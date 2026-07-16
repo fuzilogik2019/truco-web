@@ -1,0 +1,26 @@
+# ─────────────────────────────────────────────────────────────
+# Este repo contiene SOLO lo necesario para desplegar el sitio a S3.
+# Lo de abajo son herramientas y fuentes que viven en local y NO se
+# versionan ni se suben al bucket.
+# ─────────────────────────────────────────────────────────────
+
+# Herramientas de desarrollo (regeneran assets / sirven en local)
+gen_mc_assets.py
+servir.bat
+
+# Fuentes de arte (los PNG exportados sí van; los .aseprite no)
+*.aseprite
+
+# Assets que quedaron sin usar en el sitio (referencia local)
+assets/logo4.png
+assets/logo_v3.aseprite
+assets/table_felt.png
+assets/mesa_de_truco_top.png
+assets/mc/lana_verde.png
+assets/mc/tablones.png
+
+# Sistema / editores
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

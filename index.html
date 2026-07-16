@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Truco Argentino — Mod para Minecraft</title>
+<meta name="description" content="Jugá al Truco argentino dentro de Minecraft: Envido, Flor, Truco y Vale Cuatro contra otros jugadores o contra el Carpincho. Mod de Fabric para Minecraft 26.2.">
+<link rel="icon" type="image/png" href="assets/cards/1e.png">
+<meta property="og:title" content="Truco Argentino — Mod para Minecraft">
+<meta property="og:description" content="Envido, Flor, Truco y Vale Cuatro dentro de Minecraft. Contra jugadores o contra el Carpincho.">
+<meta property="og:image" content="assets/header_logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Rubik:ital,wght@0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* Paleta extraída del logo del header: crema #faf2d2 / tinta #00090a /
+       arena #e2be83 / celeste #6ea2d4-#73afca / cuero #56371c */
+    --paper: #faf3dc;
+    --paper-2: #f1e6c6;
+    --ink: #131c20;
+    --ink-soft: #625b48;
+    --felt: #16333d;
+    --felt-deep: #071318;
+    --felt-line: #33628f;
+    --celeste: #6ea2d4;
+    --celeste-deep: #33628f;
+    --gold: #e2be83;
+    --rojo: #a34430;
+    --wood: #56371c;
+    --wood-2: #6f4a28;
+    --card-white: #faf2d2;
+    --shadow: 0 12px 32px rgba(52, 39, 20, 0.18);
+    --px: "Press Start 2P", monospace;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "Rubik", system-ui, sans-serif;
+    font-size: 17px;
+    line-height: 1.7;
+  }
+  img.pixel, .hand img, .fan img { image-rendering: pixelated; }
+  a { color: var(--celeste-deep); }
+
+  h2 {
+    font-family: var(--px);
+    font-size: clamp(1rem, 2.6vw, 1.45rem);
+    line-height: 1.6;
+    margin-bottom: 18px;
+  }
+  .kicker {
+    font-family: var(--px);
+    font-size: 0.6rem;
+    letter-spacing: 2px;
+    color: var(--celeste-deep);
+    display: block;
+    margin-bottom: 14px;
+  }
+  section { padding: 88px 24px; }
+  .wrap { max-width: 1060px; margin: 0 auto; }
+  .lead { max-width: 640px; color: var(--ink-soft); font-size: 1.05rem; }
+
+  code {
+    background: #131c20;
+    color: var(--gold);
+    padding: 3px 9px;
+    border-radius: 6px;
+    font-size: 0.88em;
+    white-space: nowrap;
+  }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-family: var(--px);
+    font-size: 0.68rem;
+    text-decoration: none;
+    color: var(--ink);
+    background: var(--gold);
+    padding: 16px 26px;
+    border-radius: 4px;
+    border: 3px solid rgba(0,0,0,0.85);
+    box-shadow:
+      inset 3px 3px 0 rgba(255,255,255,0.4),
+      inset -3px -3px 0 rgba(0,0,0,0.22),
+      0 5px 0 rgba(0,0,0,0.8);
+    transition: transform 0.08s, box-shadow 0.08s;
+  }
+  .btn:hover { transform: translateY(-2px); box-shadow: inset 3px 3px 0 rgba(255,255,255,0.4), inset -3px -3px 0 rgba(0,0,0,0.22), 0 7px 0 rgba(0,0,0,0.8); }
+  .btn:active { transform: translateY(3px); box-shadow: inset 3px 3px 0 rgba(0,0,0,0.22), inset -3px -3px 0 rgba(255,255,255,0.2), 0 2px 0 rgba(0,0,0,0.8); }
+  .btn.ghost { background: var(--card-white); }
+  .btn.green { background: var(--felt-line); color: #fff; }
+  .btn-ic { width: 22px; height: 22px; image-rendering: pixelated; vertical-align: -4px; }
+  .btn { overflow: visible; }
+  .btn-ic.card {
+    width: auto; height: 58px;
+    margin: -30px 8px -20px -10px;
+    vertical-align: middle;
+    border-radius: 3px;
+    transform: rotate(-8deg);
+    transform-origin: bottom center;
+    box-shadow: 2px 3px 6px rgba(0,0,0,0.35);
+    transition: transform 0.12s;
+  }
+  .btn:hover .btn-ic.card { transform: rotate(-3deg) translateY(-3px); }
+
+  /* ============ NAV ============ */
+  nav {
+    position: sticky; top: 0; z-index: 50;
+    background:
+      linear-gradient(rgba(0,0,0,0.12), rgba(0,0,0,0.12)),
+      repeating-linear-gradient(90deg, var(--wood) 0 90px, var(--wood-2) 90px 92px, var(--wood) 92px 180px);
+    background-color: var(--wood);
+    border-bottom: 4px solid #2e1e11;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.35);
+  }
+  nav .wrap {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 24px; gap: 16px;
+  }
+  nav .brand {
+    font-family: var(--px);
+    font-size: 0.72rem;
+    color: #fff;
+    text-decoration: none;
+    text-shadow: 2px 2px 0 #000;
+    display: flex; align-items: center; gap: 12px;
+  }
+  nav .brand img { height: 30px; width: auto; image-rendering: pixelated; display: block; filter: drop-shadow(2px 2px 0 rgba(0,0,0,0.5)); }
+  nav .links { display: flex; gap: 26px; align-items: center; }
+  nav .links a {
+    color: #ead9c2; text-decoration: none; font-size: 0.92rem; font-weight: 500;
+  }
+  nav .links a:hover { color: #fff; }
+  @media (max-width: 720px) { nav .links a:not(.gh) { display: none; } }
+  nav .gh {
+    font-family: var(--px); font-size: 0.55rem;
+    background: rgba(0,0,0,0.35); border: 2px solid rgba(255,255,255,0.25);
+    padding: 9px 14px; border-radius: 8px; color: #fff !important;
+  }
+
+  /* ============ HERO (paño de mesa) ============ */
+  .hero {
+    background:
+      radial-gradient(ellipse 120% 80% at 50% 0%, rgba(110,162,212,0.18), transparent 55%),
+      radial-gradient(ellipse 140% 100% at 50% 110%, rgba(0,0,0,0.5), transparent 60%),
+      repeating-linear-gradient(45deg, transparent 0 22px, rgba(115,175,202,0.03) 22px 44px),
+      linear-gradient(180deg, var(--felt) 0%, var(--felt-deep) 100%);
+    color: #fff;
+    text-align: center;
+    padding: 84px 24px 48px;
+    overflow: hidden;
+  }
+  /* escenario del logo: el wordmark al frente, con las cartas abanicadas detrás */
+  .logo-stage {
+    position: relative;
+    display: inline-block;
+    margin: 0 auto;
+    padding: 46px 84px 40px;
+    max-width: 100%;
+  }
+  .hero .logo {
+    position: relative; z-index: 2; display: block;
+    width: min(540px, 78vw);
+    image-rendering: pixelated;
+    filter: drop-shadow(0 10px 24px rgba(0,0,0,0.6));
+  }
+  .logo-cards { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
+  .logo-cards img {
+    position: absolute; top: 50%;
+    width: clamp(84px, 15vw, 138px);
+    border-radius: 6px;
+    box-shadow: 0 12px 26px rgba(0,0,0,0.5);
+    animation: cardBob 6.5s ease-in-out infinite;
+  }
+  .logo-cards img:nth-child(1) { left: 0;  transform: translateY(-52%) rotate(-19deg); animation-delay: 0s; }
+  .logo-cards img:nth-child(2) { left: 17%; transform: translateY(-60%) rotate(-7deg); animation-delay: 0.8s; }
+  .logo-cards img:nth-child(3) { right: 17%; transform: translateY(-60%) rotate(7deg); animation-delay: 1.5s; }
+  .logo-cards img:nth-child(4) { right: 0; transform: translateY(-52%) rotate(19deg); animation-delay: 2.2s; }
+  @keyframes cardBob {
+    0%, 100% { margin-top: 0; }
+    50% { margin-top: -12px; }
+  }
+  @media (max-width: 620px) {
+    .logo-stage { padding: 30px 40px 26px; }
+    .logo-cards img:nth-child(2) { left: 6%; }
+    .logo-cards img:nth-child(3) { right: 6%; }
+  }
+  .hero .tagline {
+    max-width: 600px; margin: 26px auto 0;
+    font-size: 1.18rem; color: #f3ecd4;
+  }
+  .hero .tagline strong { color: var(--gold); font-weight: 700; }
+  .chips { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin: 26px 0 34px; }
+  .chip {
+    font-family: var(--px); font-size: 0.55rem;
+    background: rgba(0,0,0,0.35);
+    border: 2px solid rgba(110,162,212,0.4);
+    color: #d8e6f2;
+    padding: 9px 15px; border-radius: 999px;
+  }
+  .hero-actions { display: flex; flex-wrap: wrap; gap: 18px; justify-content: center; }
+
+  /* ============ CINTA DE CANTOS ============ */
+  .ticker {
+    background: linear-gradient(180deg, #73afca, var(--celeste));
+    border-top: 4px solid #0b1a26;
+    border-bottom: 4px solid #0b1a26;
+    overflow: hidden;
+    padding: 13px 0;
+  }
+  .ticker-track {
+    display: flex; gap: 56px; width: max-content;
+    animation: ticker 26s linear infinite;
+    font-family: var(--px); font-size: 0.66rem;
+    color: #0b1a26; text-shadow: 1px 1px 0 rgba(250,242,210,0.45);
+    white-space: nowrap;
+  }
+  .ticker-track span::after { content: "✦"; margin-left: 56px; color: #faf2d2; text-shadow: none; }
+  @keyframes ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+  /* ============ FEATURES (naipes) ============ */
+  #features { background: var(--paper); }
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 26px; margin-top: 40px;
+  }
+  .ncard {
+    background: var(--card-white);
+    border: 2px solid #ddcda3;
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+    padding: 26px 24px 24px;
+    position: relative;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .ncard:hover { transform: translateY(-6px) rotate(-0.5deg); box-shadow: 0 18px 40px rgba(52,39,20,0.24); }
+  .ncard .pip {
+    position: absolute; top: 12px; left: 14px;
+    font-size: 0.95rem; line-height: 1.1;
+    color: var(--rojo); font-weight: 700;
+  }
+  .ncard .pip.b { color: var(--celeste-deep); }
+  .ncard .pip-card {
+    position: absolute; top: -12px; left: -10px;
+    width: 38px;
+    image-rendering: pixelated;
+    transform: rotate(-9deg);
+    border-radius: 3px;
+    box-shadow: 2px 3px 8px rgba(0,0,0,0.3);
+  }
+  .ncard:hover .pip-card { transform: rotate(-3deg) translateY(-3px); transition: transform 0.15s; }
+  .ncard .icon {
+    display: block; margin-bottom: 12px; margin-top: 6px;
+    width: 44px; height: 44px;
+    image-rendering: pixelated;
+    filter: drop-shadow(2px 3px 0 rgba(0,0,0,0.22));
+  }
+  .ncard h3 {
+    font-family: var(--px); font-size: 0.7rem; line-height: 1.7;
+    margin-bottom: 10px; color: var(--ink);
+  }
+  .ncard p { color: var(--ink-soft); font-size: 0.95rem; }
+
+  /* ============ DEMO (mesa) ============ */
+  #demo {
+    background:
+      radial-gradient(ellipse 130% 90% at 50% -10%, rgba(255,255,255,0.08), transparent 55%),
+      repeating-linear-gradient(45deg, transparent 0 22px, rgba(255,255,255,0.025) 22px 44px),
+      linear-gradient(180deg, var(--felt-deep), var(--felt) 40%, var(--felt-deep));
+    border-top: 10px solid var(--wood);
+    border-bottom: 10px solid var(--wood);
+    color: #eaf5ee; text-align: center;
+  }
+  #demo .kicker { color: var(--gold); }
+  #demo .lead { margin: 0 auto; color: #c3d6e4; }
+  .hand { display: flex; justify-content: center; gap: 22px; min-height: 190px; align-items: flex-end; margin-top: 44px; }
+  .hand img {
+    width: clamp(76px, 26vw, 118px); border-radius: 6px;
+    box-shadow: 0 10px 28px rgba(0,0,0,0.5);
+    transition: transform 0.15s; cursor: default;
+  }
+  .hand img:hover { transform: translateY(-14px) rotate(-2deg) scale(1.04); }
+  .hand img.dealt { animation: deal 0.4s cubic-bezier(0.2, 0.8, 0.3, 1.1) backwards; }
+  @keyframes deal {
+    from { transform: translateY(-90px) rotate(10deg); opacity: 0; }
+    to { transform: translateY(0) rotate(0); opacity: 1; }
+  }
+  #demo-result {
+    font-family: var(--px); font-size: 0.85rem; line-height: 1.8;
+    margin: 30px 0 26px; min-height: 2em;
+    text-shadow: 2px 2px 0 rgba(0,0,0,0.45);
+  }
+  #demo-result .num { color: var(--gold); font-size: 1.1rem; }
+  #demo-result .flor { color: var(--gold); animation: florpulse 0.7s ease-in-out infinite alternate; display: inline-block; }
+  @keyframes florpulse { from { transform: scale(1); } to { transform: scale(1.12); } }
+  #deal-btn { border: 3px solid rgba(0,0,0,0.85); cursor: pointer; }
+
+  /* ============ CAPINCHO ============ */
+  #capincho { background: var(--paper-2); }
+  .cap-flex { display: flex; gap: 48px; align-items: center; flex-wrap: wrap; }
+  .cap-txt { flex: 1 1 400px; }
+  .cap-side { flex: 0 1 280px; display: flex; flex-direction: column; gap: 18px; }
+  .mate-card {
+    background: var(--card-white); border: 2px solid #ddcda3; border-radius: 14px;
+    box-shadow: var(--shadow); padding: 26px; text-align: center;
+  }
+  .mate-card img { width: 88px; }
+  .mate-card p { font-family: var(--px); font-size: 0.56rem; line-height: 1.9; margin-top: 12px; color: var(--ink-soft); }
+  .levels { display: flex; gap: 12px; flex-wrap: wrap; margin: 20px 0; }
+  .level {
+    font-family: var(--px); font-size: 0.6rem; color: #fff;
+    padding: 11px 18px; border-radius: 999px;
+    border: 2px solid rgba(0,0,0,0.75);
+    box-shadow: 0 3px 0 rgba(0,0,0,0.7);
+  }
+  .level.facil { background: #55804f; }
+  .level.normal { background: #b8862b; }
+  .level.picante { background: var(--rojo); }
+  .cap-txt p + p { margin-top: 14px; }
+  .cap-txt .lead { max-width: none; }
+
+  /* ============ PASOS ============ */
+  #como-jugar { background: var(--paper); }
+  .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 24px; margin-top: 40px; counter-reset: paso; }
+  .step {
+    counter-increment: paso;
+    background: var(--card-white);
+    border: 2px solid #ddcda3; border-radius: 14px;
+    box-shadow: var(--shadow); padding: 58px 22px 24px;
+    position: relative;
+  }
+  .step::before {
+    content: counter(paso);
+    position: absolute; top: -18px; left: 20px;
+    font-family: var(--px); font-size: 0.95rem;
+    background: var(--celeste); color: #10324e;
+    width: 46px; height: 46px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    border: 3px solid rgba(0,0,0,0.8);
+    box-shadow: 0 4px 0 rgba(0,0,0,0.75);
+  }
+  .step h3 { font-size: 1.02rem; font-weight: 700; margin-bottom: 8px; }
+  .step p { color: var(--ink-soft); font-size: 0.94rem; }
+
+  /* ============ COMANDOS ============ */
+  #comandos { background: var(--felt-deep); color: #e6ecdf; }
+  #comandos .kicker { color: var(--gold); }
+  #comandos h2 { color: #fff; }
+  #comandos .lead { color: #8fa4b0; }
+  .cmd-list { margin-top: 36px; display: grid; gap: 2px; border-radius: 14px; overflow: hidden; }
+  .cmd {
+    display: flex; flex-wrap: wrap; gap: 6px 24px; align-items: baseline;
+    background: #0e2029; padding: 16px 22px;
+  }
+  .cmd:nth-child(odd) { background: #0b1a22; }
+  .cmd code { background: transparent; color: #9cc9ec; padding: 0; font-size: 0.95rem; }
+  .cmd span { color: #8fa4b0; font-size: 0.92rem; flex: 1 1 320px; }
+
+  /* ============ INSTALACIÓN ============ */
+  #instalacion { background: var(--paper); }
+  .install-box {
+    background: var(--card-white); border: 2px solid #ddcda3; border-radius: 16px;
+    box-shadow: var(--shadow); padding: 36px; margin-top: 36px;
+  }
+  .install-box ol { margin: 18px 0 26px 22px; color: var(--ink-soft); }
+  .install-box li { margin-bottom: 8px; }
+  .req { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
+  .req span {
+    font-family: var(--px); font-size: 0.55rem;
+    background: var(--paper-2); border: 2px solid #ddcda3;
+    padding: 9px 14px; border-radius: 8px; color: var(--ink-soft);
+  }
+
+  /* ============ ROADMAP ============ */
+  #roadmap { background: var(--paper-2); }
+  .roadmap { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 30px; }
+  .roadmap span {
+    background: transparent; border: 2px dashed #b5a888;
+    color: var(--ink-soft); padding: 9px 18px; border-radius: 999px; font-size: 0.92rem;
+  }
+
+  /* ---------- crafteo estilo Minecraft (UI recreada + íconos MCIcons) ---------- */
+  .craft-hint {
+    color: var(--celeste-deep);
+    font-weight: 700;
+    text-decoration: underline dotted;
+    text-underline-offset: 3px;
+    cursor: help;
+    white-space: nowrap;
+    outline: none;
+  }
+  .craft-hint:hover, .craft-hint:focus-visible { color: var(--rojo); }
+  #craft-pop {
+    position: fixed; z-index: 210; display: none;
+    filter: drop-shadow(0 10px 22px rgba(0,0,0,0.4));
+  }
+  #craft-pop .craft-wrap { width: min(370px, calc(100vw - 24px)); gap: 18px; }
+  .craft-wrap {
+    display: flex; align-items: center; justify-content: center; gap: 26px; flex-wrap: wrap;
+    background: #c6c6c6;
+    border: 4px solid; border-color: #ffffff #555555 #555555 #ffffff;
+    outline: 2px solid #1a1a1a;
+    padding: 22px 30px 16px;
+    width: max-content; max-width: 100%;
+  }
+  .craft-grid { display: grid; grid-template-columns: repeat(3, 46px); grid-auto-rows: 46px; gap: 4px; }
+  .craft-slot {
+    width: 46px; height: 46px; background: #8b8b8b;
+    border: 2px solid; border-color: #373737 #ffffff #ffffff #373737;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .craft-slot img { width: 38px; height: 38px; image-rendering: pixelated; }
+  .craft-arrow { font-size: 2rem; color: #6d6d6d; text-shadow: 2px 2px 0 #fff; font-weight: 700; }
+  .craft-slot.result { width: 64px; height: 64px; }
+  .craft-slot.result img { width: 58px; height: 58px; }
+  .craft-caption {
+    flex-basis: 100%; text-align: center;
+    font-family: var(--px); font-size: 0.52rem; color: #3d3d3d; margin-top: 6px;
+  }
+
+  /* ---------- tooltip de item estilo Minecraft ---------- */
+  #mc-tooltip {
+    position: fixed; z-index: 200; pointer-events: none; display: none;
+    background: rgba(16, 0, 16, 0.94);
+    border: 2px solid transparent;
+    border-image: linear-gradient(#5f2fd8, #2b0a63) 1;
+    padding: 8px 12px;
+    font-family: var(--px); font-size: 0.55rem; line-height: 2.1;
+    color: #fff; white-space: nowrap;
+  }
+  #mc-tooltip .mod { color: #7f7fff; font-style: italic; display: block; }
+
+  footer {
+    background:
+      linear-gradient(rgba(0,0,0,0.15), rgba(0,0,0,0.15)),
+      repeating-linear-gradient(90deg, var(--wood) 0 90px, var(--wood-2) 90px 92px, var(--wood) 92px 180px);
+    background-color: var(--wood);
+    border-top: 4px solid #2e1e11;
+    color: #cbb79b; text-align: center;
+    padding: 48px 24px; font-size: 0.92rem;
+  }
+  footer img { width: 54px; image-rendering: pixelated; margin-bottom: 14px; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.4)); }
+  footer a { color: #ead9c2; }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <a class="brand" href="#"><img src="assets/header_logo.png" alt="Truco Argentino"></a>
+    <div class="links">
+      <a href="#features">Features</a>
+      <a href="#demo">Probá una mano</a>
+      <a href="#capincho">El Carpincho</a>
+      <a href="#comandos">Comandos</a>
+      <a href="#instalacion">Instalación</a>
+      <a class="gh" href="https://github.com/fuzilogik2019/truco-minecraft" target="_blank" rel="noopener">GITHUB</a>
+    </div>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="logo-stage">
+    <div class="logo-cards" aria-hidden="true">
+      <img src="assets/cards/1e.png" alt="">
+      <img src="assets/cards/1b.png" alt="">
+      <img src="assets/cards/7e.png" alt="">
+      <img src="assets/cards/7o.png" alt="">
+    </div>
+    <img class="logo" src="assets/header_logo.png" alt="Truco Argentino">
+  </div>
+  <p class="tagline">
+    El Truco de verdad, adentro de Minecraft. <strong>1v1 y 2v2 con señas</strong>:
+    Envido, Flor, Truco y Vale Cuatro — y sí, podés <strong>mentir los tantos</strong>.
+    Contra otros jugadores, o contra el Carpincho, que no perdona.
+  </p>
+  <div class="chips">
+    <span class="chip">MINECRAFT 26.2</span>
+    <span class="chip">FABRIC</span>
+    <span class="chip">JAVA 25</span>
+    <span class="chip">MIT</span>
+  </div>
+  <div class="hero-actions">
+    <a class="btn" href="#instalacion"><img class="btn-ic" src="assets/mc/icons/written_book.png" alt=""> DESCARGAR</a>
+    <a class="btn ghost" href="#demo"><img class="btn-ic card" src="assets/cards/1e.png" alt=""> PROBÁ UNA MANO</a>
+  </div>
+</div>
+
+<div class="ticker" aria-hidden="true">
+  <div class="ticker-track">
+    <span>¡TRUCO!</span><span>¡QUIERO RETRUCO!</span><span>¡ENVIDO!</span><span>¡FLOR!</span>
+    <span>¡VALE CUATRO!</span><span>¡NO TE CREO!</span><span>¡FALTA ENVIDO!</span><span>ME VOY AL MAZO</span>
+    <span>¡TRUCO!</span><span>¡QUIERO RETRUCO!</span><span>¡ENVIDO!</span><span>¡FLOR!</span>
+    <span>¡VALE CUATRO!</span><span>¡NO TE CREO!</span><span>¡FALTA ENVIDO!</span><span>ME VOY AL MAZO</span>
+  </div>
+</div>
+
+<section id="features">
+  <div class="wrap">
+    <span class="kicker">✦ FEATURES</span>
+    <h2>Con las reglas de verdad,<br>no una versión de juguete</h2>
+    <p class="lead">Motor de reglas en Java puro con más de 340 tests. Si el mod te cobra mal un envido, andá pensando en pedir disculpas.</p>
+    <div class="cards-grid">
+      <div class="ncard"><img class="pip-card" src="assets/cards/1e.png" alt="Ancho de espada"><img class="icon" src="assets/mc/icons/written_book.png" alt="Libro">
+        <h3>Reglas completas</h3>
+        <p>Envido, Real Envido, Falta Envido, Flor, Contraflor y al resto, Truco / Retruco / Vale Cuatro, pardas, "el envido está primero" e irse al mazo. A 15 o 30 puntos, con o sin flor.</p></div>
+      <div class="ncard"><img class="pip-card" src="assets/cards/1b.png" alt="Ancho de basto"><img class="icon" src="assets/mc/icons/villager_spawn_egg.png" alt="Compañeros">
+        <h3>2v2 con señas</h3>
+        <p>Truco por equipos en la <strong>Mesa Grande</strong> (2×2): el lado donde te sentás define tu equipo. Señas clásicas a tu compañero por canal privado — y como en la mesa real, <strong>se pueden pescar</strong>: al rival atento le asoma un instante la seña ajena. El Carpincho las hace, las entiende… y te las caza.</p></div>
+      <div class="ncard"><img class="pip-card" src="assets/cards/7e.png" alt="Siete de espada"><img class="icon" src="assets/mc/icons/name_tag.png" alt="Etiqueta de nombre">
+        <h3>Mentir los tantos</h3>
+        <p>Al quererse el envido declarás tu tanto <em>de palabra</em>, salvo mostrada. Al final de la mano el rival decide: <strong>"Te creo"</strong> o <strong>"¡No te creo!"</strong> — y el mentiroso pescado paga castigo. Funciona en 1v1 y en 2v2.</p></div>
+      <div class="ncard"><img class="pip-card" src="assets/cards/7o.png" alt="Siete de oro"><img class="icon" src="assets/mc/icons/crafting_table.png" alt="Mesa">
+        <h3>Mesa física</h3>
+        <p>Un bloque de mesa con paño verde: click derecho y te sentás. Las cartas jugadas se ven sobre la mesa, en el mundo. Se craftea con lana verde y tablones.</p></div>
+      <div class="ncard"><img class="pip-card" src="assets/cards/3o.png" alt="Tres de oro"><img class="icon" src="assets/mc/icons/painting.png" alt="Pantalla">
+        <h3>GUI dedicada</h3>
+        <p>Baraja española real de 40, botones solo con los cantos legales, anotador de fósforos, relato de la mano y cámara cinematográfica. En español (AR y ES) e inglés.</p></div>
+      <div class="ncard"><img class="pip-card" src="assets/cards/2c.png" alt="Dos de copa"><img class="icon" src="assets/mc/icons/shield.png" alt="Escudo">
+        <h3>Anti-trampa</h3>
+        <p>El servidor es la única autoridad: las cartas del rival nunca viajan a tu cliente hasta que se juegan. Ni con hacks, ni mirando paquetes.</p></div>
+      <div class="ncard"><img class="pip-card" src="assets/cards/5e.png" alt="Cinco de espada"><img class="icon" src="assets/mc/icons/spyglass.png" alt="Catalejo">
+        <h3>Modo espectador</h3>
+        <p>¿Hay partida en la mesa? Click derecho y mirala en vivo. La información oculta se filtra en el servidor — el mirón tampoco puede espiar.</p></div>
+      <div class="ncard"><img class="pip-card" src="assets/cards/6b.png" alt="Seis de basto"><img class="icon" src="assets/mc/icons/nether_star.png" alt="Estrella">
+        <h3>Logros y revancha</h3>
+        <p>Tab de logros propio (partida perfecta, mostrar 33, ganarle al picante…), <strong>Revancha</strong> al terminar (30 s para la del gallinero) y un fin de partida vistoso con las manos finales y el resumen (envidos, mentiras pescadas).</p></div>
+      <div class="ncard"><img class="pip-card" src="assets/cards/4c.png" alt="Cuatro de copa"><img class="icon" src="assets/mc/icons/comparator.png" alt="Comparador">
+        <h3>Configurable</h3>
+        <p>Escala de mesa y cartas, opacidad del paño, cámara — todo desde la GUI. En el server: <code>/truco puntos 15|30</code>, <code>/truco flor con|sin</code> y <code>/truco mentir con|sin</code>.</p></div>
+      <div class="ncard"><img class="pip-card" src="assets/cards/12c.png" alt="Doce de copa"><img class="icon" src="assets/mc/icons/jukebox.png" alt="Rocola">
+        <h3>Con sabor</h3>
+        <p>Frases reactivas, gruñidos con palabra ("envido", "truco", "flor"), la <strong>ronda del mate</strong> que pasa de mano en mano por la mesa, fanfarria al ganar, emotes de partículas y estadísticas con <code>/truco stats</code>.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="demo">
+  <div class="wrap">
+    <span class="kicker">✦ DEMO</span>
+    <h2 style="color:#fff">Probá una mano</h2>
+    <p class="lead">
+      Esta es la baraja española real del mod, las mismas 40 cartas que ves en la mesa.
+      Repartite tres y fijate qué tenés para el envido — si te tocan tres del mismo palo,
+      cantá flor. O mentila, total acá no hay mostrada.
+    </p>
+    <div class="hand" id="hand"></div>
+    <div id="demo-result"></div>
+    <button class="btn" id="deal-btn" type="button"><img class="btn-ic card" src="assets/cards/back.png" alt=""> REPARTIR</button>
+  </div>
+</section>
+
+<section id="capincho">
+  <div class="wrap">
+    <span class="kicker">✦ EL RIVAL DE LA CASA</span>
+    <h2>El Carpincho</h2>
+    <div class="cap-flex">
+      <div class="cap-txt">
+        <p class="lead">
+          ¿No hay nadie conectado? El mod incluye al <strong>Carpincho</strong>: un carpincho
+          cebador de mate que se sienta enfrente tuyo, te mira, gruñe cuando canta y juega
+          al Truco en serio. Elegí cuánto querés sufrir:
+        </p>
+        <div class="levels">
+          <span class="level facil">FÁCIL</span>
+          <span class="level normal">NORMAL</span>
+          <span class="level picante">PICANTE</span>
+        </div>
+        <p class="lead">
+          El nivel se le nota en la <strong>pinta</strong>, sin carteles: el
+          <em>tranqui</em> mastica una brizna de pasto, el <em>canchero</em> lleva pañuelo
+          de gaucho al cuello y el <em>picante</em> se planta con poncho y rebenque.
+        </p>
+        <p class="lead">
+          Y con la variante mentirosa activada, el Carpincho <strong>miente y desconfía</strong>
+          según el nivel: el fácil jamás infla un tanto, el picante te mete flores falsas —
+          y si te pesca mintiendo una vez, <strong>te toma de punto</strong>: cada mentira
+          descubierta le sube la desconfianza por el resto de la partida.
+        </p>
+      </div>
+      <div class="cap-side">
+        <div class="mate-card">
+          <img class="pixel" src="assets/mate.png" alt="Mate">
+          <p>GANALE Y TE PAGA<br>EN MATES</p>
+        </div>
+        <div class="mate-card">
+          <img class="pixel" src="assets/cards/back.png" alt="Dorso de carta" style="width:72px">
+          <p>INVOCALO CON<br><span style="color:var(--rojo)">/TRUCO BOT PICANTE</span></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="cards-grid" style="margin-top:56px">
+      <div class="ncard"><img class="icon" src="assets/mc/icons/hay_block.png" alt="Fardo de heno">
+        <h3>Ranchos salvajes</h3>
+        <p>Generados en ríos y sabanas: una mesa, un farol y un <strong>carpincho salvaje</strong> con nivel de por vida. Sentate y la partida arranca sola. Paga 1, 2 o 3 mates según el nivel.</p></div>
+      <div class="ncard"><img class="icon" src="assets/mc/icons/lantern.png" alt="Farol">
+        <h3>Rancho 2v2</h3>
+        <p>Un cobertizo con la Mesa Grande y <strong>tres carpinchos</strong>: sentate en el lado libre y se arma el 2v2 al toque — vos con un carpincho de compañero, contra los otros dos.</p></div>
+      <div class="ncard"><img class="icon" src="assets/mc/icons/oak_sign.png" alt="Cartel">
+        <h3>La Pulpería</h3>
+        <p>El hub del truco, muy raro de encontrar: un boliche con cartel, dos mesas chicas, una Mesa Grande y <strong>cinco carpinchos</strong> de todos los niveles. Fichas van, fichas vienen.</p></div>
+      <div class="ncard"><img class="icon" src="assets/mc/icons/compass.png" alt="Brújula">
+        <h3>Carpincho errante</h3>
+        <p>Deambula por sabanas y ríos buscando dónde jugar. Ponele una mesa cerca y <strong>la adopta</strong>: camina hasta ella, se instala y espera rival.</p></div>
+      <div class="ncard"><img class="icon" src="assets/mc/icons/lead.png" alt="Correa">
+        <h3>Carpinchos mascota</h3>
+        <p>Ganale a un salvaje y cebale <strong>mates</strong> hasta que se haga tu amigo: te sigue, es tu rival portátil en cualquier mesa y tu compañero de 2v2 (el más señero de todos). Con <code>/truco mascota</code> lo llamás desde donde sea o lo mandás a dormir.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="como-jugar">
+  <div class="wrap">
+    <span class="kicker">✦ EN CUATRO PASOS</span>
+    <h2>Cómo se juega</h2>
+    <div class="steps">
+      <div class="step">
+        <h3>Conseguí la mesa</h3>
+        <p>Se craftea con <span class="craft-hint" id="craft-hint" tabindex="0" role="button" aria-label="Ver receta de crafteo">lana verde y tablones</span> (también está en el creativo). Para el 2v2, armá la <strong>Mesa Grande</strong> de 2×2.</p>
+      </div>
+      <div class="step">
+        <h3>Sentate</h3>
+        <p>Apoyala y hacé click derecho: quedás sentado con el cartel <em>"X quiere jugar al Truco — 1/2"</em> esperando rival. En la Mesa Grande, el lado que elegís es tu equipo.</p>
+      </div>
+      <div class="step">
+        <h3>Que se siente el rival</h3>
+        <p>Click derecho en la misma mesa, acepta la invitación y se abre la GUI: click en una carta para jugarla, botones para cantar (y señas al compañero en 2v2).</p>
+      </div>
+      <div class="step">
+        <h3>¿Cerraste con ESC?</h3>
+        <p>Tranquilo: click derecho en la mesa y volvés a la partida como si nada.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="comandos">
+  <div class="wrap">
+    <span class="kicker">✦ REFERENCIA</span>
+    <h2>Comandos</h2>
+    <p class="lead">Todo también se puede hacer por comando, sin mesa de por medio.</p>
+    <div class="cmd-list">
+      <div class="cmd"><code>/truco desafiar &lt;jugador&gt;</code><span>Desafía a otro jugador sin necesidad de mesa.</span></div>
+      <div class="cmd"><code>/truco 2v2 &lt;compañero&gt; &lt;rival1&gt; &lt;rival2&gt;</code><span>Arma un 2v2 por comando — o sentate en una Mesa de Truco Grande, que el lado elige el equipo.</span></div>
+      <div class="cmd"><code>/truco aceptar · rechazar</code><span>Responde un desafío 1v1 o una invitación 2v2.</span></div>
+      <div class="cmd"><code>/truco mesa</code><span>Reabre la mesa de tu partida en curso.</span></div>
+      <div class="cmd"><code>/truco abandonar</code><span>Te vas al mazo… de la partida entera.</span></div>
+      <div class="cmd"><code>/truco revancha</code><span>Pide la revancha en los 30 segundos después de una partida (o el botón de la GUI).</span></div>
+      <div class="cmd"><code>/truco ultima [página]</code><span>El relato completo de tu última partida, paginado de a 12 líneas.</span></div>
+      <div class="cmd"><code>/truco bot facil|normal|picante</code><span>Invoca al Carpincho para jugar contra la máquina (sentado en una mesa).</span></div>
+      <div class="cmd"><code>/truco mascota</code><span>Abre la pantalla de tus carpinchos mascota: llamalos desde donde estén o mandalos a dormir.</span></div>
+      <div class="cmd"><code>/truco stats</code><span>Tu récord contra Carpincho (total y por nivel) y tus mentiras coladas, pescadas y mostradas ganadas.</span></div>
+      <div class="cmd"><code>/truco puntos 15|30</code><span>Puntaje objetivo del servidor, default 15 (solo operadores).</span></div>
+      <div class="cmd"><code>/truco flor con|sin</code><span>Se juega con o sin flor (solo operadores).</span></div>
+      <div class="cmd"><code>/truco mentir con|sin</code><span>Tantos declarados de palabra (default) o cantados automáticos (solo operadores).</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="instalacion">
+  <div class="wrap">
+    <span class="kicker">✦ A JUGAR</span>
+    <h2>Instalación</h2>
+    <div class="install-box">
+      <div class="req">
+        <span>MINECRAFT 26.2</span><span>FABRIC LOADER ≥ 0.19.3</span><span>JAVA 25</span><span>CLIENTE + SERVIDOR</span>
+      </div>
+      <ol>
+        <li>Descargá el jar de tu versión (<code>truco-x.y.z+26.2.jar</code>; hay build para <strong>1.21.1</strong> también) y <a href="https://modrinth.com/mod/fabric-api" target="_blank" rel="noopener">Fabric API</a> si no lo tenés.</li>
+        <li>Copiá ambos jars a la carpeta <code>mods/</code> de tu instancia y de tu servidor.</li>
+        <li>Crafteá una Mesa de Truco y desafiá a alguien (o al Carpincho).</li>
+      </ol>
+      <div style="display:flex; gap:16px; flex-wrap:wrap">
+        <a class="btn green" href="https://github.com/fuzilogik2019/truco-minecraft/releases" target="_blank" rel="noopener"><img class="btn-ic" src="assets/mc/icons/crafting_table.png" alt=""> ÚLTIMA VERSIÓN</a>
+        <a class="btn ghost" href="https://fabricmc.net/use/installer/" target="_blank" rel="noopener">INSTALAR FABRIC</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="roadmap">
+  <div class="wrap">
+    <span class="kicker">✦ LO QUE VIENE</span>
+    <h2>Roadmap</h2>
+    <div class="roadmap">
+      <span>Skins de baraja</span>
+      <span>Memoria de yunta de la mascota</span>
+      <span>Leaderboard PvP</span>
+      <span>Apuestas en la mesa</span>
+      <span>Torneos</span>
+      <span>Publicación en Modrinth</span>
+    </div>
+  </div>
+</section>
+
+<div id="craft-pop" role="tooltip">
+  <div class="craft-wrap">
+    <div class="craft-grid">
+      <div class="craft-slot"><img src="assets/mc/icons/green_wool.png" alt="Lana verde"></div>
+      <div class="craft-slot"><img src="assets/mc/icons/green_wool.png" alt="Lana verde"></div>
+      <div class="craft-slot"><img src="assets/mc/icons/green_wool.png" alt="Lana verde"></div>
+      <div class="craft-slot"><img src="assets/mc/icons/oak_planks.png" alt="Tablones"></div>
+      <div class="craft-slot"><img src="assets/mc/icons/oak_planks.png" alt="Tablones"></div>
+      <div class="craft-slot"><img src="assets/mc/icons/oak_planks.png" alt="Tablones"></div>
+      <div class="craft-slot"><img src="assets/mc/icons/oak_planks.png" alt="Tablones"></div>
+      <div class="craft-slot"><img src="assets/mc/icons/oak_planks.png" alt="Tablones"></div>
+      <div class="craft-slot"><img src="assets/mc/icons/oak_planks.png" alt="Tablones"></div>
+    </div>
+    <span class="craft-arrow">→</span>
+    <div class="craft-slot result"><img src="assets/mc/mesa_iso.png" alt="Mesa de Truco"></div>
+    <div class="craft-caption">3 × LANA VERDE + 6 × TABLONES → MESA DE TRUCO</div>
+  </div>
+</div>
+
+<footer>
+  <img src="assets/cards/1b.png" alt="">
+  <p>Truco Argentino · Mod de Fabric para Minecraft · <a href="https://github.com/fuzilogik2019/truco-minecraft" target="_blank" rel="noopener">Código en GitHub</a></p>
+  <p style="margin-top:8px; opacity:0.75">Licencia MIT — © Fuzilogik. Minecraft es una marca de Mojang/Microsoft; este mod no está afiliado.</p>
+  <p style="margin-top:8px; opacity:0.75">Íconos por <a href="https://github.com/themuhamed/mcicons" target="_blank" rel="noopener">McIcons</a> (MIT) · Baraja española por <a href="https://jcanabal.itch.io/spanish-deck-pixel-art" target="_blank" rel="noopener">J. Canabal</a>.</p>
+</footer>
+
+<script>
+(function () {
+  var RANKS = [1, 2, 3, 4, 5, 6, 7, 10, 11, 12];
+  var SUITS = { e: "espada", b: "basto", o: "oro", c: "copa" };
+  var SUIT_KEYS = Object.keys(SUITS);
+
+  function envidoValue(rank) { return rank >= 10 ? 0 : rank; }
+
+  // Envido de una mano de 3: dos (o tres) del mismo palo suman +20.
+  function computeEnvido(hand) {
+    var bySuit = {};
+    hand.forEach(function (c) { (bySuit[c.suit] = bySuit[c.suit] || []).push(envidoValue(c.rank)); });
+    var best = 0, flor = false;
+    SUIT_KEYS.forEach(function (s) {
+      var vals = (bySuit[s] || []).slice().sort(function (a, b) { return b - a; });
+      if (vals.length === 3) flor = true;
+      if (vals.length >= 2) best = Math.max(best, vals[0] + vals[1] + 20);
+      else if (vals.length === 1) best = Math.max(best, vals[0]);
+    });
+    return { envido: best, flor: flor };
+  }
+
+  function dealHand() {
+    var deck = [];
+    RANKS.forEach(function (r) { SUIT_KEYS.forEach(function (s) { deck.push({ rank: r, suit: s }); }); });
+    var hand = [];
+    for (var i = 0; i < 3; i++) {
+      hand.push(deck.splice(Math.floor(Math.random() * deck.length), 1)[0]);
+    }
+    return hand;
+  }
+
+  var handEl = document.getElementById("hand");
+  var resultEl = document.getElementById("demo-result");
+  var btn = document.getElementById("deal-btn");
+
+  // Tooltip de item estilo Minecraft (con el nombre del mod en azul, como corresponde)
+  var tip = document.createElement("div");
+  tip.id = "mc-tooltip";
+  tip.innerHTML = '<span class="name"></span><span class="mod">Truco Argentino</span>';
+  document.body.appendChild(tip);
+  var tipName = tip.querySelector(".name");
+  function bindTip(img) {
+    if (!img.alt) return;
+    img.addEventListener("mousemove", function (e) {
+      tipName.textContent = img.alt;
+      tip.style.display = "block";
+      tip.style.left = Math.min(e.clientX + 16, window.innerWidth - tip.offsetWidth - 8) + "px";
+      tip.style.top = (e.clientY + 20) + "px";
+    });
+    img.addEventListener("mouseleave", function () { tip.style.display = "none"; });
+  }
+  document.querySelectorAll(".pip-card").forEach(bindTip);
+
+  // Popover de crafteo: aparece al hacer hover/focus sobre "lana verde y tablones"
+  var craftHint = document.getElementById("craft-hint");
+  var craftPop = document.getElementById("craft-pop");
+  function positionCraft() {
+    var r = craftHint.getBoundingClientRect();
+    craftPop.style.display = "block";
+    var w = craftPop.offsetWidth, h = craftPop.offsetHeight;
+    var left = Math.max(8, Math.min(r.left + r.width / 2 - w / 2, window.innerWidth - w - 8));
+    var top = r.top - h - 12;
+    if (top < 8) top = r.bottom + 12; // si no entra arriba, lo abre abajo
+    craftPop.style.left = left + "px";
+    craftPop.style.top = top + "px";
+  }
+  function hideCraft() { craftPop.style.display = "none"; }
+  craftHint.addEventListener("mouseenter", positionCraft);
+  craftHint.addEventListener("focus", positionCraft);
+  craftHint.addEventListener("mouseleave", hideCraft);
+  craftHint.addEventListener("blur", hideCraft);
+  craftHint.addEventListener("keydown", function (e) { if (e.key === "Escape") { hideCraft(); craftHint.blur(); } });
+
+  function render(hand) {
+    handEl.innerHTML = "";
+    hand.forEach(function (c, i) {
+      var img = document.createElement("img");
+      img.src = "assets/cards/" + c.rank + c.suit + ".png";
+      img.alt = (c.rank === 1 ? "Ancho" : c.rank) + " de " + SUITS[c.suit];
+      img.className = "dealt";
+      img.style.animationDelay = (i * 0.13) + "s";
+      bindTip(img);
+      handEl.appendChild(img);
+    });
+    var r = computeEnvido(hand);
+    resultEl.textContent = "";
+    setTimeout(function () {
+      resultEl.innerHTML = r.flor
+        ? '<span class="flor">¡¡FLOR!!</span> &nbsp;(<span class="num">' + r.envido + "</span> de envido)"
+        : 'Tenés <span class="num">' + r.envido + "</span> de envido";
+    }, 500);
+  }
+
+  btn.addEventListener("click", function () { render(dealHand()); });
+  render(dealHand());
+})();
+</script>
+</body>
+</html>
