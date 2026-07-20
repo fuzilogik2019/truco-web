@@ -4,14 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Truco Argentino — Mod para Minecraft</title>
-<meta name="description" content="Jugá al Truco argentino dentro de Minecraft: Envido, Flor, Truco y Vale Cuatro contra otros jugadores o contra el Carpincho. Mod de Fabric para Minecraft 26.2.">
-<link rel="icon" type="image/png" href="assets/cards/1e.png">
+<meta name="description" content="Jugá al Truco argentino dentro de Minecraft: 1v1 y 2v2 con señas, Envido, Flor y mentir los tantos, contra otros jugadores o contra el Carpincho y sus 4 niveles. Mod de Fabric para Minecraft 26.2 y 1.21.1.">
+<link rel="icon" type="image/png" href="assets/mod/mod_icon.png">
 <meta property="og:title" content="Truco Argentino — Mod para Minecraft">
-<meta property="og:description" content="Envido, Flor, Truco y Vale Cuatro dentro de Minecraft. Contra jugadores o contra el Carpincho.">
+<meta property="og:description" content="1v1 y 2v2 con señas, mentir los tantos, mascotas y el Carpincho de 4 niveles. Todo adentro de Minecraft.">
 <meta property="og:image" content="assets/header_logo.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Rubik:ital,wght@0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
 <style>
   :root {
     /* Paleta extraída del logo del header: crema #faf2d2 / tinta #00090a /
@@ -27,22 +24,33 @@
     --celeste-deep: #33628f;
     --gold: #e2be83;
     --rojo: #a34430;
+    --rojo-bright: #e2734f;
     --wood: #56371c;
     --wood-2: #6f4a28;
     --card-white: #faf2d2;
+    --panel-ink: #f1e6c9;
+    --panel-ink-soft: #cdbfa0;
     --shadow: 0 12px 32px rgba(52, 39, 20, 0.18);
-    --px: "Press Start 2P", monospace;
+    /* Sin fuentes externas (autocontenido): stack pixel-ish con lo que
+       ya trae el sistema, en vez de bajar "Press Start 2P"/"Rubik" de un CDN. */
+    --px: ui-monospace, "Cascadia Mono", "Courier New", monospace;
+    --body-font: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html { scroll-behavior: smooth; }
   body {
     background: var(--paper);
     color: var(--ink);
-    font-family: "Rubik", system-ui, sans-serif;
+    font-family: var(--body-font);
     font-size: 17px;
     line-height: 1.7;
   }
-  img.pixel, .hand img, .fan img { image-rendering: pixelated; }
+  /* Todo sprite del mod (cartas, señas, paperdolls, mate, mesas, íconos MC)
+     se ve pixelado, tenga o no la clase .pixel puesta a mano. */
+  img.pixel, .hand img, .fan img,
+  img[src*="assets/cards/"], img[src*="assets/mod/"], img[src*="assets/mc/"] {
+    image-rendering: pixelated;
+  }
   a { color: var(--celeste-deep); }
 
   h2 {
@@ -50,10 +58,12 @@
     font-size: clamp(1rem, 2.6vw, 1.45rem);
     line-height: 1.6;
     margin-bottom: 18px;
+    letter-spacing: 0.5px;
   }
   .kicker {
     font-family: var(--px);
-    font-size: 0.6rem;
+    font-size: 0.72rem;
+    font-weight: 700;
     letter-spacing: 2px;
     color: var(--celeste-deep);
     display: block;
@@ -75,7 +85,9 @@
   .btn {
     display: inline-flex; align-items: center; gap: 10px;
     font-family: var(--px);
-    font-size: 0.68rem;
+    font-weight: 700;
+    font-size: 0.82rem;
+    letter-spacing: 0.5px;
     text-decoration: none;
     color: var(--ink);
     background: var(--gold);
@@ -92,7 +104,7 @@
   .btn:active { transform: translateY(3px); box-shadow: inset 3px 3px 0 rgba(0,0,0,0.22), inset -3px -3px 0 rgba(255,255,255,0.2), 0 2px 0 rgba(0,0,0,0.8); }
   .btn.ghost { background: var(--card-white); }
   .btn.green { background: var(--felt-line); color: #fff; }
-  .btn-ic { width: 22px; height: 22px; image-rendering: pixelated; vertical-align: -4px; }
+  .btn-ic { width: 22px; height: 22px; vertical-align: -4px; }
   .btn { overflow: visible; }
   .btn-ic.card {
     width: auto; height: 58px;
@@ -105,6 +117,30 @@
     transition: transform 0.12s;
   }
   .btn:hover .btn-ic.card { transform: rotate(-3deg) translateY(-3px); }
+
+  /* ============ NINE-SLICE DEL MOD (identidad visual in-game) ============
+     Los 3 PNG de la GUI nueva, reusados tal cual con border-image:
+     - panel_dark.png (borde real 6px, "fill stretch"): tarjetas y paneles
+       oscuros en TODO el sitio (features, niveles, señas, mascotas, mundo).
+     - table_frame.png (borde real 8px): marcos destacados (hero, la mesa
+       de la demo, el carrusel).
+     - anotador_paper.png (borde real 6px): paneles claros (comandos,
+       instalación) — ojo, va con texto oscuro encima. */
+  .panel-dark {
+    border: 12px solid transparent;
+    border-image: url('assets/mod/panel_dark.png') 6 fill stretch;
+    color: var(--panel-ink);
+  }
+  .frame-table {
+    border: 20px solid transparent;
+    border-image: url('assets/mod/table_frame.png') 8 fill stretch;
+  }
+  .panel-paper {
+    border: 12px solid transparent;
+    border-image: url('assets/mod/anotador_paper.png') 6 fill stretch;
+    background: var(--card-white);
+    color: var(--ink);
+  }
 
   /* ============ NAV ============ */
   nav {
@@ -122,27 +158,29 @@
   }
   nav .brand {
     font-family: var(--px);
-    font-size: 0.72rem;
+    font-weight: 700;
+    font-size: 0.85rem;
     color: #fff;
     text-decoration: none;
     text-shadow: 2px 2px 0 #000;
     display: flex; align-items: center; gap: 12px;
   }
-  nav .brand img { height: 30px; width: auto; image-rendering: pixelated; display: block; filter: drop-shadow(2px 2px 0 rgba(0,0,0,0.5)); }
-  nav .links { display: flex; gap: 26px; align-items: center; }
+  nav .brand img { height: 30px; width: auto; display: block; filter: drop-shadow(2px 2px 0 rgba(0,0,0,0.5)); }
+  nav .links { display: flex; gap: 22px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
   nav .links a {
-    color: #ead9c2; text-decoration: none; font-size: 0.92rem; font-weight: 500;
+    color: #ead9c2; text-decoration: none; font-size: 0.9rem; font-weight: 500;
   }
   nav .links a:hover { color: #fff; }
-  @media (max-width: 720px) { nav .links a:not(.gh) { display: none; } }
+  @media (max-width: 900px) { nav .links a:not(.gh) { display: none; } }
   nav .gh {
-    font-family: var(--px); font-size: 0.55rem;
+    font-family: var(--px); font-weight: 700; font-size: 0.68rem;
     background: rgba(0,0,0,0.35); border: 2px solid rgba(255,255,255,0.25);
     padding: 9px 14px; border-radius: 8px; color: #fff !important;
   }
 
   /* ============ HERO (paño de mesa) ============ */
   .hero {
+    position: relative;
     background:
       radial-gradient(ellipse 120% 80% at 50% 0%, rgba(110,162,212,0.18), transparent 55%),
       radial-gradient(ellipse 140% 100% at 50% 110%, rgba(0,0,0,0.5), transparent 60%),
@@ -153,6 +191,13 @@
     padding: 84px 24px 48px;
     overflow: hidden;
   }
+  .hero-badge {
+    position: absolute; top: 20px; right: 26px;
+    width: 62px;
+    filter: drop-shadow(0 6px 14px rgba(0,0,0,0.55));
+    transform: rotate(-7deg);
+  }
+  @media (max-width: 620px) { .hero-badge { width: 40px; top: 12px; right: 12px; } }
   /* escenario del logo: el wordmark al frente, con las cartas abanicadas detrás */
   .logo-stage {
     position: relative;
@@ -164,7 +209,6 @@
   .hero .logo {
     position: relative; z-index: 2; display: block;
     width: min(540px, 78vw);
-    image-rendering: pixelated;
     filter: drop-shadow(0 10px 24px rgba(0,0,0,0.6));
   }
   .logo-cards { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
@@ -189,13 +233,13 @@
     .logo-cards img:nth-child(3) { right: 6%; }
   }
   .hero .tagline {
-    max-width: 600px; margin: 26px auto 0;
+    max-width: 640px; margin: 26px auto 0;
     font-size: 1.18rem; color: #f3ecd4;
   }
   .hero .tagline strong { color: var(--gold); font-weight: 700; }
   .chips { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin: 26px 0 34px; }
   .chip {
-    font-family: var(--px); font-size: 0.55rem;
+    font-family: var(--px); font-weight: 700; font-size: 0.7rem;
     background: rgba(0,0,0,0.35);
     border: 2px solid rgba(110,162,212,0.4);
     color: #d8e6f2;
@@ -214,56 +258,50 @@
   .ticker-track {
     display: flex; gap: 56px; width: max-content;
     animation: ticker 26s linear infinite;
-    font-family: var(--px); font-size: 0.66rem;
+    font-family: var(--px); font-weight: 700; font-size: 0.78rem;
     color: #0b1a26; text-shadow: 1px 1px 0 rgba(250,242,210,0.45);
     white-space: nowrap;
   }
   .ticker-track span::after { content: "✦"; margin-left: 56px; color: #faf2d2; text-shadow: none; }
   @keyframes ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 
-  /* ============ FEATURES (naipes) ============ */
-  #features { background: var(--paper); }
+  /* ============ TARJETAS OSCURAS COMPARTIDAS (naipes / niveles / señas / mascotas / mundo) ============ */
   .cards-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 26px; margin-top: 40px;
   }
   .ncard {
-    background: var(--card-white);
-    border: 2px solid #ddcda3;
-    border-radius: 14px;
-    box-shadow: var(--shadow);
     padding: 26px 24px 24px;
     position: relative;
     transition: transform 0.15s, box-shadow 0.15s;
+    box-shadow: var(--shadow);
   }
-  .ncard:hover { transform: translateY(-6px) rotate(-0.5deg); box-shadow: 0 18px 40px rgba(52,39,20,0.24); }
+  .ncard:hover { transform: translateY(-6px) rotate(-0.5deg); box-shadow: 0 18px 40px rgba(0,0,0,0.4); }
   .ncard .pip {
     position: absolute; top: 12px; left: 14px;
     font-size: 0.95rem; line-height: 1.1;
-    color: var(--rojo); font-weight: 700;
+    color: var(--rojo-bright); font-weight: 700;
   }
-  .ncard .pip.b { color: var(--celeste-deep); }
+  .ncard .pip.b { color: var(--celeste); }
   .ncard .pip-card {
     position: absolute; top: -12px; left: -10px;
     width: 38px;
-    image-rendering: pixelated;
     transform: rotate(-9deg);
     border-radius: 3px;
-    box-shadow: 2px 3px 8px rgba(0,0,0,0.3);
+    box-shadow: 2px 3px 8px rgba(0,0,0,0.4);
   }
   .ncard:hover .pip-card { transform: rotate(-3deg) translateY(-3px); transition: transform 0.15s; }
   .ncard .icon {
     display: block; margin-bottom: 12px; margin-top: 6px;
     width: 44px; height: 44px;
-    image-rendering: pixelated;
-    filter: drop-shadow(2px 3px 0 rgba(0,0,0,0.22));
+    filter: drop-shadow(2px 3px 0 rgba(0,0,0,0.4));
   }
   .ncard h3 {
-    font-family: var(--px); font-size: 0.7rem; line-height: 1.7;
-    margin-bottom: 10px; color: var(--ink);
+    font-family: var(--px); font-weight: 700; font-size: 0.86rem; line-height: 1.6;
+    margin-bottom: 10px; color: #fff;
   }
-  .ncard p { color: var(--ink-soft); font-size: 0.95rem; }
+  .ncard p { color: var(--panel-ink-soft); font-size: 0.95rem; }
 
   /* ============ DEMO (mesa) ============ */
   #demo {
@@ -277,7 +315,8 @@
   }
   #demo .kicker { color: var(--gold); }
   #demo .lead { margin: 0 auto; color: #c3d6e4; }
-  .hand { display: flex; justify-content: center; gap: 22px; min-height: 190px; align-items: flex-end; margin-top: 44px; }
+  .table-surface { margin: 44px auto 0; max-width: 620px; padding: 34px 18px 26px; background: rgba(0,0,0,0.18); }
+  .hand { display: flex; justify-content: center; gap: 22px; min-height: 190px; align-items: flex-end; }
   .hand img {
     width: clamp(76px, 26vw, 118px); border-radius: 6px;
     box-shadow: 0 10px 28px rgba(0,0,0,0.5);
@@ -290,87 +329,168 @@
     to { transform: translateY(0) rotate(0); opacity: 1; }
   }
   #demo-result {
-    font-family: var(--px); font-size: 0.85rem; line-height: 1.8;
+    font-family: var(--px); font-weight: 700; font-size: 1.05rem; line-height: 1.8;
     margin: 30px 0 26px; min-height: 2em;
     text-shadow: 2px 2px 0 rgba(0,0,0,0.45);
   }
-  #demo-result .num { color: var(--gold); font-size: 1.1rem; }
+  #demo-result .num { color: var(--gold); font-size: 1.25rem; }
   #demo-result .flor { color: var(--gold); animation: florpulse 0.7s ease-in-out infinite alternate; display: inline-block; }
   @keyframes florpulse { from { transform: scale(1); } to { transform: scale(1.12); } }
   #deal-btn { border: 3px solid rgba(0,0,0,0.85); cursor: pointer; }
 
-  /* ============ CAPINCHO ============ */
-  #capincho { background: var(--paper-2); }
-  .cap-flex { display: flex; gap: 48px; align-items: center; flex-wrap: wrap; }
-  .cap-txt { flex: 1 1 400px; }
-  .cap-side { flex: 0 1 280px; display: flex; flex-direction: column; gap: 18px; }
-  .mate-card {
-    background: var(--card-white); border: 2px solid #ddcda3; border-radius: 14px;
-    box-shadow: var(--shadow); padding: 26px; text-align: center;
+  /* ============ EL CARPINCHO — 4 NIVELES ============ */
+  #carpincho { background: var(--paper-2); }
+  .level-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 24px; margin-top: 40px; }
+  .level-card { text-align: center; padding: 30px 20px 22px; }
+  .level-card img.doll { width: 72px; margin-bottom: 14px; filter: drop-shadow(3px 5px 0 rgba(0,0,0,0.45)); }
+  .level-card h3 { font-family: var(--px); font-weight: 700; font-size: 0.92rem; color: #fff; margin-bottom: 10px; }
+  .level-card p { color: var(--panel-ink-soft); font-size: 0.92rem; }
+  .level-stats { display: flex; justify-content: center; gap: 10px; margin-top: 18px; flex-wrap: wrap; }
+  .level-stats span {
+    font-family: var(--px); font-weight: 700; font-size: 0.68rem;
+    background: rgba(0,0,0,0.32); border: 2px solid rgba(255,255,255,0.15);
+    padding: 8px 11px; border-radius: 6px; color: var(--gold);
   }
-  .mate-card img { width: 88px; }
-  .mate-card p { font-family: var(--px); font-size: 0.56rem; line-height: 1.9; margin-top: 12px; color: var(--ink-soft); }
-  .levels { display: flex; gap: 12px; flex-wrap: wrap; margin: 20px 0; }
-  .level {
-    font-family: var(--px); font-size: 0.6rem; color: #fff;
-    padding: 11px 18px; border-radius: 999px;
-    border: 2px solid rgba(0,0,0,0.75);
-    box-shadow: 0 3px 0 rgba(0,0,0,0.7);
+  .cap-note { max-width: 720px; margin: 44px auto 0; text-align: center; color: var(--ink-soft); }
+  .cap-note p + p { margin-top: 12px; }
+
+  /* ============ SEÑAS ============ */
+  #senas { background: var(--felt-deep); color: #e6ecdf; }
+  #senas .kicker { color: var(--gold); }
+  #senas h2 { color: #fff; }
+  #senas .lead { color: #9cb2bf; }
+  .sena-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 18px; margin-top: 40px; }
+  .sena-card { text-align: center; padding: 20px 14px 16px; }
+  .sena-card img { width: 56px; height: 56px; margin-bottom: 10px; filter: drop-shadow(2px 3px 0 rgba(0,0,0,0.4)); }
+  .sena-card h4 { font-family: var(--px); font-weight: 700; font-size: 0.72rem; color: #fff; margin-bottom: 6px; line-height: 1.5; }
+  .sena-card p { color: var(--panel-ink-soft); font-size: 0.82rem; }
+  .sena-note { max-width: 720px; margin: 40px auto 0; color: #9cb2bf; text-align: center; }
+  .sena-note strong { color: var(--gold); }
+
+  /* ============ MASCOTAS ============ */
+  #mascotas { background: var(--paper); }
+
+  /* ============ TRUCO EN EL MUNDO ============ */
+  #mundo { background: var(--paper-2); }
+
+  /* ============ LA PAVA Y EL MATE ============ */
+  #pava { background: var(--felt); color: #eaf5ee; }
+  #pava .kicker { color: var(--gold); }
+  #pava h2 { color: #fff; }
+  #pava .lead { color: #c3d6e4; }
+  .pava-flex { display: flex; gap: 48px; align-items: center; flex-wrap: wrap; margin-top: 40px; }
+  .pava-txt { flex: 1 1 400px; color: #d7e3df; }
+  .pava-txt p + p { margin-top: 14px; }
+  .pava-txt strong { color: var(--gold); }
+  .mate-showcase { flex: 0 0 220px; padding: 34px 20px; text-align: center; }
+  .mate-showcase img { width: 128px; margin-bottom: 14px; filter: drop-shadow(4px 6px 0 rgba(0,0,0,0.4)); }
+  .mate-showcase p { font-family: var(--px); font-weight: 700; font-size: 0.62rem; line-height: 2; color: var(--gold); }
+
+  /* ============ CARRUSEL "EN EL JUEGO" ============ */
+  #en-el-juego { background: var(--felt-deep); color: #eaf5ee; }
+  #en-el-juego .kicker { color: var(--gold); }
+  #en-el-juego h2 { color: #fff; }
+  #en-el-juego .lead { color: #9cb2bf; margin: 0 auto; }
+  .carousel-frame { max-width: 820px; margin: 44px auto 0; padding: 14px; }
+  .carousel { position: relative; overflow: hidden; }
+  .carousel:focus-visible { outline: 2px solid var(--celeste); outline-offset: 3px; }
+  .carousel-track { display: flex; transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1); }
+  .carousel-slide {
+    flex: 0 0 100%;
+    aspect-ratio: 16 / 9;
+    position: relative;
+    display: flex; align-items: center; justify-content: center;
   }
-  .level.facil { background: #55804f; }
-  .level.normal { background: #b8862b; }
-  .level.picante { background: var(--rojo); }
-  .cap-txt p + p { margin-top: 14px; }
-  .cap-txt .lead { max-width: none; }
+  .carousel-slide img { width: 100%; height: 100%; object-fit: cover; }
+  .carousel-slide.placeholder {
+    margin: 3px;
+    border: 3px dashed #7a6543;
+    background:
+      repeating-linear-gradient(135deg, rgba(255,255,255,0.035) 0 14px, transparent 14px 28px),
+      #241a10;
+    flex-direction: column; gap: 16px;
+  }
+  .carousel-slide.placeholder img { width: 46px; height: 46px; object-fit: contain; opacity: 0.85; }
+  .carousel-slide.placeholder .cap {
+    font-family: var(--px); font-weight: 700; font-size: 0.72rem; line-height: 1.9;
+    color: #d8cbb0; text-align: center; padding: 0 24px;
+  }
+  .carousel-caption {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(transparent, rgba(0,0,0,0.75));
+    color: #fff; font-size: 0.95rem; padding: 30px 16px 12px; text-align: center;
+  }
+  .carousel-btn {
+    position: absolute; top: 50%; transform: translateY(-50%);
+    background: rgba(0,0,0,0.5); border: 2px solid rgba(255,255,255,0.4); color: #fff;
+    width: 44px; height: 44px; border-radius: 50%; cursor: pointer;
+    font-size: 1.3rem; line-height: 1; display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s;
+  }
+  .carousel-btn:hover { background: rgba(0,0,0,0.8); }
+  .carousel-btn.prev { left: 10px; }
+  .carousel-btn.next { right: 10px; }
+  .carousel-dots { display: flex; justify-content: center; gap: 9px; margin-top: 18px; }
+  .carousel-dots button {
+    width: 11px; height: 11px; border-radius: 50%; padding: 0; cursor: pointer;
+    border: 2px solid rgba(255,255,255,0.5); background: transparent;
+  }
+  .carousel-dots button.active { background: var(--gold); border-color: var(--gold); }
 
   /* ============ PASOS ============ */
   #como-jugar { background: var(--paper); }
   .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 24px; margin-top: 40px; counter-reset: paso; }
   .step {
     counter-increment: paso;
-    background: var(--card-white);
-    border: 2px solid #ddcda3; border-radius: 14px;
-    box-shadow: var(--shadow); padding: 58px 22px 24px;
+    padding: 58px 22px 24px;
     position: relative;
+    box-shadow: var(--shadow);
   }
   .step::before {
     content: counter(paso);
     position: absolute; top: -18px; left: 20px;
-    font-family: var(--px); font-size: 0.95rem;
+    font-family: var(--px); font-weight: 700; font-size: 1.05rem;
     background: var(--celeste); color: #10324e;
     width: 46px; height: 46px; border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
     border: 3px solid rgba(0,0,0,0.8);
     box-shadow: 0 4px 0 rgba(0,0,0,0.75);
   }
-  .step h3 { font-size: 1.02rem; font-weight: 700; margin-bottom: 8px; }
-  .step p { color: var(--ink-soft); font-size: 0.94rem; }
+  .step h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: 8px; color: #fff; }
+  .step p { color: var(--panel-ink-soft); font-size: 0.94rem; }
+  .como-nota { max-width: 640px; margin-top: 36px; color: var(--ink-soft); }
 
   /* ============ COMANDOS ============ */
   #comandos { background: var(--felt-deep); color: #e6ecdf; }
   #comandos .kicker { color: var(--gold); }
   #comandos h2 { color: #fff; }
   #comandos .lead { color: #8fa4b0; }
-  .cmd-list { margin-top: 36px; display: grid; gap: 2px; border-radius: 14px; overflow: hidden; }
+  .cmd-board { margin-top: 36px; padding: 8px; }
+  .cmd-list { display: grid; gap: 2px; overflow: hidden; border-radius: 2px; }
   .cmd {
     display: flex; flex-wrap: wrap; gap: 6px 24px; align-items: baseline;
-    background: #0e2029; padding: 16px 22px;
+    background: var(--card-white); padding: 14px 18px;
   }
-  .cmd:nth-child(odd) { background: #0b1a22; }
-  .cmd code { background: transparent; color: #9cc9ec; padding: 0; font-size: 0.95rem; }
-  .cmd span { color: #8fa4b0; font-size: 0.92rem; flex: 1 1 320px; }
+  .cmd:nth-child(odd) { background: var(--paper-2); }
+  .cmd code { background: transparent; color: var(--rojo); padding: 0; font-size: 0.95rem; font-weight: 700; }
+  .cmd span { color: var(--ink-soft); font-size: 0.9rem; flex: 1 1 320px; }
+  .cmd-op {
+    font-family: var(--px); font-size: 0.55rem; font-weight: 700;
+    background: var(--rojo); color: #fff; padding: 3px 7px; border-radius: 4px;
+    vertical-align: 2px;
+  }
+  .cmd-sub { font-family: var(--px); font-weight: 700; font-size: 0.68rem; color: var(--ink); background: var(--gold); padding: 10px 18px; }
+  .craft-summary { max-width: 720px; margin-top: 36px; color: #8fa4b0; }
+  .craft-summary code { color: var(--gold); }
 
   /* ============ INSTALACIÓN ============ */
   #instalacion { background: var(--paper); }
-  .install-box {
-    background: var(--card-white); border: 2px solid #ddcda3; border-radius: 16px;
-    box-shadow: var(--shadow); padding: 36px; margin-top: 36px;
-  }
+  .install-box { padding: 36px; margin-top: 36px; }
   .install-box ol { margin: 18px 0 26px 22px; color: var(--ink-soft); }
   .install-box li { margin-bottom: 8px; }
   .req { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
   .req span {
-    font-family: var(--px); font-size: 0.55rem;
+    font-family: var(--px); font-weight: 700; font-size: 0.7rem;
     background: var(--paper-2); border: 2px solid #ddcda3;
     padding: 9px 14px; border-radius: 8px; color: var(--ink-soft);
   }
@@ -413,13 +533,13 @@
     border: 2px solid; border-color: #373737 #ffffff #ffffff #373737;
     display: flex; align-items: center; justify-content: center;
   }
-  .craft-slot img { width: 38px; height: 38px; image-rendering: pixelated; }
+  .craft-slot img { width: 38px; height: 38px; }
   .craft-arrow { font-size: 2rem; color: #6d6d6d; text-shadow: 2px 2px 0 #fff; font-weight: 700; }
   .craft-slot.result { width: 64px; height: 64px; }
   .craft-slot.result img { width: 58px; height: 58px; }
   .craft-caption {
     flex-basis: 100%; text-align: center;
-    font-family: var(--px); font-size: 0.52rem; color: #3d3d3d; margin-top: 6px;
+    font-family: var(--px); font-weight: 700; font-size: 0.62rem; color: #3d3d3d; margin-top: 6px;
   }
 
   /* ---------- tooltip de item estilo Minecraft ---------- */
@@ -429,7 +549,7 @@
     border: 2px solid transparent;
     border-image: linear-gradient(#5f2fd8, #2b0a63) 1;
     padding: 8px 12px;
-    font-family: var(--px); font-size: 0.55rem; line-height: 2.1;
+    font-family: var(--px); font-weight: 700; font-size: 0.65rem; line-height: 2.1;
     color: #fff; white-space: nowrap;
   }
   #mc-tooltip .mod { color: #7f7fff; font-style: italic; display: block; }
@@ -443,7 +563,7 @@
     color: #cbb79b; text-align: center;
     padding: 48px 24px; font-size: 0.92rem;
   }
-  footer img { width: 54px; image-rendering: pixelated; margin-bottom: 14px; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.4)); }
+  footer img { width: 54px; margin-bottom: 14px; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.4)); }
   footer a { color: #ead9c2; }
 </style>
 </head>
@@ -455,7 +575,9 @@
     <div class="links">
       <a href="#features">Features</a>
       <a href="#demo">Probá una mano</a>
-      <a href="#capincho">El Carpincho</a>
+      <a href="#carpincho">El Carpincho</a>
+      <a href="#senas">Señas</a>
+      <a href="#mascotas">Mascotas</a>
       <a href="#comandos">Comandos</a>
       <a href="#instalacion">Instalación</a>
       <a class="gh" href="https://github.com/fuzilogik2019/truco-minecraft" target="_blank" rel="noopener">GITHUB</a>
@@ -464,6 +586,7 @@
 </nav>
 
 <div class="hero">
+  <img class="hero-badge" src="assets/mod/mod_icon.png" alt="Icono del mod Truco Argentino">
   <div class="logo-stage">
     <div class="logo-cards" aria-hidden="true">
       <img src="assets/cards/1e.png" alt="">
@@ -474,15 +597,15 @@
     <img class="logo" src="assets/header_logo.png" alt="Truco Argentino">
   </div>
   <p class="tagline">
-    El Truco de verdad, adentro de Minecraft. <strong>1v1 y 2v2 con señas</strong>:
+    El Truco de verdad, adentro de Minecraft. <strong>1v1 y 2v2 con señas</strong>,
     Envido, Flor, Truco y Vale Cuatro — y sí, podés <strong>mentir los tantos</strong>.
-    Contra otros jugadores, o contra el Carpincho, que no perdona.
+    Domá Carpinchos de 4 niveles, armá mascotas para tu equipo y salí a buscar
+    partida por el mundo: ranchos, errantes y la mismísima Pulpería.
   </p>
   <div class="chips">
-    <span class="chip">MINECRAFT 26.2</span>
+    <span class="chip">MINECRAFT 26.2 · 1.21.1</span>
     <span class="chip">FABRIC</span>
-    <span class="chip">JAVA 25</span>
-    <span class="chip">MIT</span>
+    <span class="chip">362 TESTS</span>
   </div>
   <div class="hero-actions">
     <a class="btn" href="#instalacion"><img class="btn-ic" src="assets/mc/icons/written_book.png" alt=""> DESCARGAR</a>
@@ -503,38 +626,50 @@
   <div class="wrap">
     <span class="kicker">✦ FEATURES</span>
     <h2>Con las reglas de verdad,<br>no una versión de juguete</h2>
-    <p class="lead">Motor de reglas en Java puro con más de 340 tests. Si el mod te cobra mal un envido, andá pensando en pedir disculpas.</p>
+    <p class="lead">Motor de reglas en Java puro con 362 tests. Si el mod te cobra mal un envido, andá pensando en pedir disculpas.</p>
     <div class="cards-grid">
-      <div class="ncard"><img class="pip-card" src="assets/cards/1e.png" alt="Ancho de espada"><img class="icon" src="assets/mc/icons/written_book.png" alt="Libro">
+      <div class="ncard panel-dark"><img class="pip-card" src="assets/cards/1e.png" alt="Ancho de espada"><img class="icon" src="assets/mc/icons/written_book.png" alt="Libro">
         <h3>Reglas completas</h3>
         <p>Envido, Real Envido, Falta Envido, Flor, Contraflor y al resto, Truco / Retruco / Vale Cuatro, pardas, "el envido está primero" e irse al mazo. A 15 o 30 puntos, con o sin flor.</p></div>
-      <div class="ncard"><img class="pip-card" src="assets/cards/1b.png" alt="Ancho de basto"><img class="icon" src="assets/mc/icons/villager_spawn_egg.png" alt="Compañeros">
-        <h3>2v2 con señas</h3>
-        <p>Truco por equipos en la <strong>Mesa Grande</strong> (2×2): el lado donde te sentás define tu equipo. Señas clásicas a tu compañero por canal privado — y como en la mesa real, <strong>se pueden pescar</strong>: al rival atento le asoma un instante la seña ajena. El Carpincho las hace, las entiende… y te las caza.</p></div>
-      <div class="ncard"><img class="pip-card" src="assets/cards/7e.png" alt="Siete de espada"><img class="icon" src="assets/mc/icons/name_tag.png" alt="Etiqueta de nombre">
+      <div class="ncard panel-dark"><img class="pip-card" src="assets/cards/1b.png" alt="Ancho de basto"><img class="icon" src="assets/mc/icons/villager_spawn_egg.png" alt="Compañeros">
+        <h3>1v1 y 2v2 por equipos</h3>
+        <p>Sentate solo, o armá la <strong>Mesa Grande</strong> (2×2): el lado donde te sentás define tu equipo. En la ronda del envido solo habla el equipo que va perdiendo, como en la mesa real.</p></div>
+      <div class="ncard panel-dark"><img class="pip-card" src="assets/cards/7e.png" alt="Siete de espada"><img class="icon" src="assets/mc/icons/name_tag.png" alt="Etiqueta de nombre">
         <h3>Mentir los tantos</h3>
-        <p>Al quererse el envido declarás tu tanto <em>de palabra</em>, salvo mostrada. Al final de la mano el rival decide: <strong>"Te creo"</strong> o <strong>"¡No te creo!"</strong> — y el mentiroso pescado paga castigo. Funciona en 1v1 y en 2v2.</p></div>
-      <div class="ncard"><img class="pip-card" src="assets/cards/7o.png" alt="Siete de oro"><img class="icon" src="assets/mc/icons/crafting_table.png" alt="Mesa">
+        <p>Al quererse el envido declarás tu tanto <em>de palabra</em>. Recién al final de la mano el rival decide: <strong>"Te creo"</strong> o <strong>"¡No te creo!"</strong> (mostrada) — y el mentiroso pescado paga castigo. Funciona en 1v1 y en 2v2.</p></div>
+      <div class="ncard panel-dark"><img class="pip-card" src="assets/cards/7o.png" alt="Siete de oro"><img class="icon" src="assets/mc/icons/villager_spawn_egg.png" alt="Señas">
+        <h3>Señas (y "seña pescada")</h3>
+        <p>En el 2v2 le señás carta y tantos a tu compañero por canal privado. Pero ojo: los rivales atentos te pueden <strong>pescar la seña</strong> — un flash de un instante — y vos a ellos.</p></div>
+      <div class="ncard panel-dark"><img class="pip-card" src="assets/cards/3o.png" alt="Tres de oro"><img class="icon" src="assets/mc/icons/crafting_table.png" alt="Mesa">
         <h3>Mesa física</h3>
         <p>Un bloque de mesa con paño verde: click derecho y te sentás. Las cartas jugadas se ven sobre la mesa, en el mundo. Se craftea con lana verde y tablones.</p></div>
-      <div class="ncard"><img class="pip-card" src="assets/cards/3o.png" alt="Tres de oro"><img class="icon" src="assets/mc/icons/painting.png" alt="Pantalla">
-        <h3>GUI dedicada</h3>
-        <p>Baraja española real de 40, botones solo con los cantos legales, anotador de fósforos, relato de la mano y cámara cinematográfica. En español (AR y ES) e inglés.</p></div>
-      <div class="ncard"><img class="pip-card" src="assets/cards/2c.png" alt="Dos de copa"><img class="icon" src="assets/mc/icons/shield.png" alt="Escudo">
+      <div class="ncard panel-dark"><img class="pip-card" src="assets/cards/2c.png" alt="Dos de copa"><img class="icon" src="assets/mc/icons/shield.png" alt="Escudo">
         <h3>Anti-trampa</h3>
         <p>El servidor es la única autoridad: las cartas del rival nunca viajan a tu cliente hasta que se juegan. Ni con hacks, ni mirando paquetes.</p></div>
-      <div class="ncard"><img class="pip-card" src="assets/cards/5e.png" alt="Cinco de espada"><img class="icon" src="assets/mc/icons/spyglass.png" alt="Catalejo">
-        <h3>Modo espectador</h3>
-        <p>¿Hay partida en la mesa? Click derecho y mirala en vivo. La información oculta se filtra en el servidor — el mirón tampoco puede espiar.</p></div>
-      <div class="ncard"><img class="pip-card" src="assets/cards/6b.png" alt="Seis de basto"><img class="icon" src="assets/mc/icons/nether_star.png" alt="Estrella">
+      <div class="ncard panel-dark"><img class="pip-card" src="assets/cards/4o.png" alt="Cuatro de oro"><img class="icon pixel" src="assets/mod/nivel_picante.png" alt="El Carpincho">
+        <h3>El Carpincho, 4 niveles</h3>
+        <p>Tranqui, Canchero, Picante y el rarísimo Messi (~3% de las veces, el más difícil de todos). Cada uno con su pinta, sus frases, y con la variante mentirosa activada, sus propias mentiras.</p></div>
+      <div class="ncard panel-dark"><img class="pip-card" src="assets/cards/6c.png" alt="Seis de copa"><img class="icon" src="assets/mc/icons/lead.png" alt="Correa">
+        <h3>Mascotas</h3>
+        <p>Ganale a un Carpincho salvaje y cebale un mate hasta domarlo: te sigue, juega de compañero en el 2v2 con la UI "Armar la mesa", y las que no entran a jugar hacen de hinchada.</p></div>
+      <div class="ncard panel-dark"><img class="pip-card" src="assets/cards/5o.png" alt="Cinco de oro"><img class="icon" src="assets/mc/icons/hay_block.png" alt="Fardo de heno">
+        <h3>Truco en el mundo</h3>
+        <p>Ranchos con mesa y Carpinchos salvajes, Carpinchos errantes que adoptan mesas nuevas, y la rarísima <strong>Pulpería</strong>: el boliche de campo con dos mesas chicas, una Mesa Grande y 5 Carpinchos de dificultad creciente.</p></div>
+      <div class="ncard panel-dark"><img class="pip-card" src="assets/cards/11b.png" alt="Once de basto"><img class="icon pixel" src="assets/mod/mate.png" alt="Mate">
+        <h3>Pava y mate energizante</h3>
+        <p>Crafteá la pava con hierro, metela en la fogata como la comida, y cebá el mate: dos sorbos con Regeneración y Velocidad. El mate cebado doma gratis, y convidárselo a un salvaje le baja la desconfianza.</p></div>
+      <div class="ncard panel-dark"><img class="pip-card" src="assets/cards/6b.png" alt="Seis de basto"><img class="icon" src="assets/mc/icons/nether_star.png" alt="Estrella">
         <h3>Logros y revancha</h3>
-        <p>Tab de logros propio (partida perfecta, mostrar 33, ganarle al picante…), <strong>Revancha</strong> al terminar (30 s para la del gallinero) y un fin de partida vistoso con las manos finales y el resumen (envidos, mentiras pescadas).</p></div>
-      <div class="ncard"><img class="pip-card" src="assets/cards/4c.png" alt="Cuatro de copa"><img class="icon" src="assets/mc/icons/comparator.png" alt="Comparador">
-        <h3>Configurable</h3>
-        <p>Escala de mesa y cartas, opacidad del paño, cámara — todo desde la GUI. En el server: <code>/truco puntos 15|30</code>, <code>/truco flor con|sin</code> y <code>/truco mentir con|sin</code>.</p></div>
-      <div class="ncard"><img class="pip-card" src="assets/cards/12c.png" alt="Doce de copa"><img class="icon" src="assets/mc/icons/jukebox.png" alt="Rocola">
-        <h3>Con sabor</h3>
-        <p>Frases reactivas, gruñidos con palabra ("envido", "truco", "flor"), la <strong>ronda del mate</strong> que pasa de mano en mano por la mesa, fanfarria al ganar, emotes de partículas y estadísticas con <code>/truco stats</code>.</p></div>
+        <p>Tab de logros propio (partida perfecta, mostrar 33, ganarle al picante, domar tu primera mascota…), <strong>Revancha</strong> configurable al terminar y un fin de partida vistoso con las manos finales y el resumen.</p></div>
+      <div class="ncard panel-dark"><img class="pip-card" src="assets/cards/2e.png" alt="Dos de espada"><img class="icon" src="assets/mc/icons/comparator.png" alt="Comparador">
+        <h3>Stats y /truco last-match</h3>
+        <p>Tu récord contra el Carpincho por nivel, mentiras coladas/pescadas/mostradas con <code>/truco stats</code>, y el relato completo de tu última partida, paginado, con <code>/truco last-match</code>.</p></div>
+      <div class="ncard panel-dark"><img class="pip-card" src="assets/cards/12c.png" alt="Doce de copa"><img class="icon" src="assets/mc/icons/painting.png" alt="Pantalla">
+        <h3>GUI configurable</h3>
+        <p>Baraja española real de 40, botones solo con los cantos legales, anotador de fósforos y relato de la mano — con el marco y los paneles de madera del propio mod. Escala de mesa/cartas y cámara, todo ajustable.</p></div>
+      <div class="ncard panel-dark"><img class="pip-card" src="assets/cards/4c.png" alt="Cuatro de copa"><img class="icon" src="assets/mc/icons/jukebox.png" alt="Rocola">
+        <h3>es_AR / es_ES / en_US</h3>
+        <p>Interfaz y relato traducidos en los 3 idiomas. Frases reactivas, gruñidos con significado ("envido", "truco", "flor") y la ronda del mate que pasa de mano en mano por la mesa.</p></div>
     </div>
   </div>
 </section>
@@ -548,68 +683,171 @@
       Repartite tres y fijate qué tenés para el envido — si te tocan tres del mismo palo,
       cantá flor. O mentila, total acá no hay mostrada.
     </p>
-    <div class="hand" id="hand"></div>
-    <div id="demo-result"></div>
-    <button class="btn" id="deal-btn" type="button"><img class="btn-ic card" src="assets/cards/back.png" alt=""> REPARTIR</button>
+    <div class="table-surface frame-table">
+      <div class="hand" id="hand"></div>
+      <div id="demo-result"></div>
+      <button class="btn" id="deal-btn" type="button"><img class="btn-ic card" src="assets/cards/back.png" alt=""> REPARTIR</button>
+    </div>
   </div>
 </section>
 
-<section id="capincho">
+<section id="carpincho">
   <div class="wrap">
     <span class="kicker">✦ EL RIVAL DE LA CASA</span>
-    <h2>El Carpincho</h2>
-    <div class="cap-flex">
-      <div class="cap-txt">
-        <p class="lead">
-          ¿No hay nadie conectado? El mod incluye al <strong>Carpincho</strong>: un carpincho
-          cebador de mate que se sienta enfrente tuyo, te mira, gruñe cuando canta y juega
-          al Truco en serio. Elegí cuánto querés sufrir:
-        </p>
-        <div class="levels">
-          <span class="level facil">FÁCIL</span>
-          <span class="level normal">NORMAL</span>
-          <span class="level picante">PICANTE</span>
-        </div>
-        <p class="lead">
-          El nivel se le nota en la <strong>pinta</strong>, sin carteles: el
-          <em>tranqui</em> mastica una brizna de pasto, el <em>canchero</em> lleva pañuelo
-          de gaucho al cuello y el <em>picante</em> se planta con poncho y rebenque.
-        </p>
-        <p class="lead">
-          Y con la variante mentirosa activada, el Carpincho <strong>miente y desconfía</strong>
-          según el nivel: el fácil jamás infla un tanto, el picante te mete flores falsas —
-          y si te pesca mintiendo una vez, <strong>te toma de punto</strong>: cada mentira
-          descubierta le sube la desconfianza por el resto de la partida.
-        </p>
+    <h2>El Carpincho — 4 niveles</h2>
+    <p class="lead">
+      ¿No hay nadie conectado? Agachate y clickeá tu mesa vacía: se sienta enfrente tuyo
+      un <strong>Carpincho</strong> cebador de mate, en nivel Canchero. Pero si salís a
+      recorrer el mundo te vas a topar con los cuatro, cada uno con su propia pinta y
+      su propia forma de jugar — sin carteles, se le nota en la ropa.
+    </p>
+    <div class="level-grid">
+      <div class="level-card panel-dark">
+        <img class="doll" src="assets/mod/nivel_tranqui.png" alt="Carpincho Tranqui">
+        <h3>Tranqui</h3>
+        <p>Mastica una brizna de pasto y no le interesa el conflicto: honesto y tímido, jamás infla un tanto.</p>
+        <div class="level-stats"><span>1 MATE</span><span>DOMA 1/2</span></div>
       </div>
-      <div class="cap-side">
-        <div class="mate-card">
-          <img class="pixel" src="assets/mate.png" alt="Mate">
-          <p>GANALE Y TE PAGA<br>EN MATES</p>
-        </div>
-        <div class="mate-card">
-          <img class="pixel" src="assets/cards/back.png" alt="Dorso de carta" style="width:72px">
-          <p>INVOCALO CON<br><span style="color:var(--rojo)">/TRUCO BOT PICANTE</span></p>
-        </div>
+      <div class="level-card panel-dark">
+        <img class="doll" src="assets/mod/nivel_canchero.png" alt="Carpincho Canchero">
+        <h3>Canchero</h3>
+        <p>Pañuelo de gaucho al cuello y juego equilibrado. El rival por defecto en tu propia mesa.</p>
+        <div class="level-stats"><span>2 MATES</span><span>DOMA 1/3</span></div>
+      </div>
+      <div class="level-card panel-dark">
+        <img class="doll" src="assets/mod/nivel_picante.png" alt="Carpincho Picante">
+        <h3>Picante</h3>
+        <p>Poncho puesto y sangre caliente: agresivo, mete flores falsas y desconfía. Si te pesca mintiendo, te toma de punto por el resto de la partida.</p>
+        <div class="level-stats"><span>3 MATES</span><span>DOMA 1/4</span></div>
+      </div>
+      <div class="level-card panel-dark">
+        <img class="doll" src="assets/mod/nivel_messi.png" alt="Carpincho Messi">
+        <h3>Messi</h3>
+        <p>Camiseta argentina y ni un pelo de tonto: el crack. Rarísimo de encontrar (~3%) y el más difícil de los cuatro, un escalón por encima del Picante en todo.</p>
+        <div class="level-stats"><span>4 MATES</span><span>DOMA 1/5</span></div>
       </div>
     </div>
+    <div class="cap-note lead">
+      <p>Cada Carpincho tiene frases propias y gruñidos con semántica — uno suena a "envido", otro a "truco", otro a "flor". Se ceba su mate en rondas de a sorbos como cualquier jugador humano en la mesa.</p>
+      <p>Y tiene memoria: si le pescás una mentira en una mostrada, su desconfianza le sube para lo que queda de partida. Si le convidás un mate cebado, se la baja.</p>
+    </div>
+  </div>
+</section>
 
-    <div class="cards-grid" style="margin-top:56px">
-      <div class="ncard"><img class="icon" src="assets/mc/icons/hay_block.png" alt="Fardo de heno">
+<section id="senas">
+  <div class="wrap">
+    <span class="kicker">✦ CANAL PRIVADO</span>
+    <h2>Las señas</h2>
+    <p class="lead">
+      En el 2v2 no hace falta escribir nada: le señás la carta o el tanto a tu
+      compañero con un ícono, como en la mesa real. El bot compañero las entiende
+      y te responde a su manera.
+    </p>
+    <div class="sena-grid">
+      <div class="sena-card panel-dark"><img src="assets/mod/senas/ancho_espada.png" alt="Seña ancho de espada"><h4>Ancho de espada</h4><p>La más brava de las cuatro.</p></div>
+      <div class="sena-card panel-dark"><img src="assets/mod/senas/ancho_basto.png" alt="Seña ancho de basto"><h4>Ancho de basto</h4><p>La segunda más brava.</p></div>
+      <div class="sena-card panel-dark"><img src="assets/mod/senas/siete_espada.png" alt="Seña siete de espada"><h4>Siete de espada</h4><p>La tercera brava.</p></div>
+      <div class="sena-card panel-dark"><img src="assets/mod/senas/siete_oro.png" alt="Seña siete de oro"><h4>Siete de oro</h4><p>La pata coja: la cuarta brava.</p></div>
+      <div class="sena-card panel-dark"><img src="assets/mod/senas/tres.png" alt="Seña tres"><h4>Tres</h4><p>La carta más alta después de las bravas.</p></div>
+      <div class="sena-card panel-dark"><img src="assets/mod/senas/dos.png" alt="Seña dos"><h4>Dos</h4><p>Tenés un dos en la mano.</p></div>
+      <div class="sena-card panel-dark"><img src="assets/mod/senas/envido_bueno.png" alt="Seña envido bueno"><h4>Envido bueno</h4><p>Tenés un envido para pelear.</p></div>
+      <div class="sena-card panel-dark"><img src="assets/mod/senas/envido_30.png" alt="Seña envido 30"><h4>Envido 30</h4><p>Treinta de envido.</p></div>
+      <div class="sena-card panel-dark"><img src="assets/mod/senas/envido_33.png" alt="Seña envido 33"><h4>Envido 33</h4><p>El envido más alto: 33.</p></div>
+      <div class="sena-card panel-dark"><img src="assets/mod/senas/nada.png" alt="Seña nada"><h4>Nada</h4><p>No tenés nada — o eso decís...</p></div>
+    </div>
+    <p class="sena-note">Ojo con esta mesa: las señas se pueden <strong>pescar</strong>. Si un rival está atento, ve el ícono ajeno en un flash de un instante — y vos podés cazarle la suya. Es información valiosa, no un chat.</p>
+  </div>
+</section>
+
+<section id="mascotas">
+  <div class="wrap">
+    <span class="kicker">✦ TU YUNTA</span>
+    <h2>Mascotas</h2>
+    <p class="lead">
+      Ganale a un Carpincho salvaje y cebale un mate: si sale bien (la chance depende
+      del nivel, igual que la doma), es tuyo. Desde ahí es parte de tu equipo.
+    </p>
+    <div class="cards-grid">
+      <div class="ncard panel-dark"><img class="icon" src="assets/mc/icons/lead.png" alt="Correa">
+        <h3>Domalo con mate</h3>
+        <p>Ganale una partida y cebale un mate para intentar la doma: 1/2 al Tranqui, 1/3 al Canchero, 1/4 al Picante y 1/5 al Messi. Tenés una ventana para reclamarlo antes de que se te escape.</p></div>
+      <div class="ncard panel-dark"><img class="icon" src="assets/mc/icons/name_tag.png" alt="Etiqueta">
+        <h3>Te sigue, o se queda</h3>
+        <p>Por defecto te sigue a todos lados. Con "quedate" se sienta en el mundo a descansar — no juega, no camina de más y no se pierde.</p></div>
+      <div class="ncard panel-dark"><img class="icon" src="assets/mc/icons/villager_spawn_egg.png" alt="Mesa">
+        <h3>Compañero de 2v2</h3>
+        <p>En la Mesa Grande, la UI <strong>"Armar la mesa"</strong> te deja elegir con qué mascota jugás: un click y se sienta enfrente tuyo, lista para señarte.</p></div>
+      <div class="ncard panel-dark"><img class="icon" src="assets/mc/icons/spyglass.png" alt="Catalejo">
+        <h3>La hinchada</h3>
+        <p>Las mascotas que no entran a la mesa (o que ya jugó otra) se paran detrás tuyo a mirar la partida. Nadie se queda afuera del todo.</p></div>
+      <div class="ncard panel-dark"><img class="icon" src="assets/mc/icons/compass.png" alt="Brújula">
+        <h3><code>/truco pets</code></h3>
+        <p>Abre el panel "Tus carpinchos" con ubicación y modo de cada uno. <code>come</code> las silba desde donde estén; <code>forget</code> olvida a las que se perdieron para siempre.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="mundo">
+  <div class="wrap">
+    <span class="kicker">✦ SIN SENTARTE A PROPÓSITO</span>
+    <h2>Truco en el mundo</h2>
+    <p class="lead">
+      No hace falta craftear nada para tropezarte con una partida: el mundo genera
+      sus propios rivales.
+    </p>
+    <div class="cards-grid">
+      <div class="ncard panel-dark"><img class="icon pixel" src="assets/mod/mesa_top.png" alt="Mesa de rancho">
         <h3>Ranchos salvajes</h3>
-        <p>Generados en ríos y sabanas: una mesa, un farol y un <strong>carpincho salvaje</strong> con nivel de por vida. Sentate y la partida arranca sola. Paga 1, 2 o 3 mates según el nivel.</p></div>
-      <div class="ncard"><img class="icon" src="assets/mc/icons/lantern.png" alt="Farol">
+        <p>Un cobertizo con una mesa y un Carpincho salvaje de nivel fijo de por vida. Sentate y la partida arranca sola.</p></div>
+      <div class="ncard panel-dark"><img class="icon" src="assets/mc/icons/lantern.png" alt="Farol">
         <h3>Rancho 2v2</h3>
-        <p>Un cobertizo con la Mesa Grande y <strong>tres carpinchos</strong>: sentate en el lado libre y se arma el 2v2 al toque — vos con un carpincho de compañero, contra los otros dos.</p></div>
-      <div class="ncard"><img class="icon" src="assets/mc/icons/oak_sign.png" alt="Cartel">
+        <p>El mismo cobertizo pero con la Mesa Grande y tres Carpinchos salvajes esperando: sentate en el lado libre y arranca el 2v2 al toque, vos con uno de compañero.</p></div>
+      <div class="ncard panel-dark"><img class="icon" src="assets/mc/icons/compass.png" alt="Brújula">
+        <h3>Carpinchos errantes</h3>
+        <p>Deambulan buscando dónde jugar. Plantale una mesa cerca y la <strong>adoptan</strong>: caminan hasta ella y esperan rival. Si pierden su mesa, vuelven a errar.</p></div>
+      <div class="ncard panel-dark"><img class="icon pixel" src="assets/mod/mesa_grande_top.png" alt="Mesa Grande de la Pulpería">
         <h3>La Pulpería</h3>
-        <p>El hub del truco, muy raro de encontrar: un boliche con cartel, dos mesas chicas, una Mesa Grande y <strong>cinco carpinchos</strong> de todos los niveles. Fichas van, fichas vienen.</p></div>
-      <div class="ncard"><img class="icon" src="assets/mc/icons/compass.png" alt="Brújula">
-        <h3>Carpincho errante</h3>
-        <p>Deambula por sabanas y ríos buscando dónde jugar. Ponele una mesa cerca y <strong>la adopta</strong>: camina hasta ella, se instala y espera rival.</p></div>
-      <div class="ncard"><img class="icon" src="assets/mc/icons/lead.png" alt="Correa">
-        <h3>Carpinchos mascota</h3>
-        <p>Ganale a un salvaje y cebale <strong>mates</strong> hasta que se haga tu amigo: te sigue, es tu rival portátil en cualquier mesa y tu compañero de 2v2 (el más señero de todos). Con <code>/truco mascota</code> lo llamás desde donde sea o lo mandás a dormir.</p></div>
+        <p>El boliche de campo del truco, rarísimo de encontrar: dos mesas chicas y una Mesa Grande, con <strong>5 Carpinchos</strong> de dificultad creciente esperando turno.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="pava">
+  <div class="wrap">
+    <span class="kicker">✦ RONDA DE MATE</span>
+    <h2>La pava y el mate</h2>
+    <div class="pava-flex">
+      <div class="pava-txt">
+        <p class="lead" style="color:#d7e3df">
+          Crafteás la pava con hierro y la metés <strong>en la fogata</strong>, igual que
+          la comida: cuando hierve, cebás el mate.
+        </p>
+        <p>Un mate cebado trae <strong>2 sorbos</strong>, y cada uno te da Regeneración y
+          Velocidad — el clásico "empujoncito" de una buena ronda.</p>
+        <p>De yapa: al intentar una doma con mate cebado <strong>el mate no se gasta</strong>
+          (la victoria previa sigue haciendo falta, eso no se negocia), y convidárselo a un
+          salvaje sin domarlo le baja la desconfianza para la próxima partida.</p>
+      </div>
+      <div class="mate-showcase panel-dark">
+        <img class="pixel" src="assets/mod/mate.png" alt="Mate cebado">
+        <p>2 SORBOS<br>REGEN + VELOCIDAD</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="en-el-juego">
+  <div class="wrap">
+    <span class="kicker">✦ CAPTURAS</span>
+    <h2>En el juego</h2>
+    <p class="lead">Así se ve todo esto puesto en el mundo — la Pulpería, el 2v2, el Messi, la pava cebando.</p>
+    <div class="carousel-frame frame-table">
+      <div class="carousel" id="carousel" tabindex="0" role="region" aria-roledescription="carrusel" aria-label="Capturas del mod en el juego">
+        <div class="carousel-track" id="carousel-track"></div>
+        <button class="carousel-btn prev" id="carousel-prev" type="button" aria-label="Captura anterior">‹</button>
+        <button class="carousel-btn next" id="carousel-next" type="button" aria-label="Captura siguiente">›</button>
+      </div>
+      <div class="carousel-dots" id="carousel-dots"></div>
     </div>
   </div>
 </section>
@@ -619,23 +857,24 @@
     <span class="kicker">✦ EN CUATRO PASOS</span>
     <h2>Cómo se juega</h2>
     <div class="steps">
-      <div class="step">
+      <div class="step panel-dark">
         <h3>Conseguí la mesa</h3>
         <p>Se craftea con <span class="craft-hint" id="craft-hint" tabindex="0" role="button" aria-label="Ver receta de crafteo">lana verde y tablones</span> (también está en el creativo). Para el 2v2, armá la <strong>Mesa Grande</strong> de 2×2.</p>
       </div>
-      <div class="step">
+      <div class="step panel-dark">
         <h3>Sentate</h3>
-        <p>Apoyala y hacé click derecho: quedás sentado con el cartel <em>"X quiere jugar al Truco — 1/2"</em> esperando rival. En la Mesa Grande, el lado que elegís es tu equipo.</p>
+        <p>Apoyala y hacé click derecho: quedás sentado con el cartel <em>"X quiere jugar al Truco"</em> esperando rival. En la Mesa Grande, el lado que elegís es tu equipo. Agachate al clickear una mesa vacía y jugás directo contra el Carpincho.</p>
       </div>
-      <div class="step">
+      <div class="step panel-dark">
         <h3>Que se siente el rival</h3>
-        <p>Click derecho en la misma mesa, acepta la invitación y se abre la GUI: click en una carta para jugarla, botones para cantar (y señas al compañero en 2v2).</p>
+        <p>Click derecho en la misma mesa, acepta la invitación y se abre la GUI: click en una carta para jugarla, botones para cantar, tanto declarado al quererse el envido y señas al compañero en 2v2.</p>
       </div>
-      <div class="step">
+      <div class="step panel-dark">
         <h3>¿Cerraste con ESC?</h3>
         <p>Tranquilo: click derecho en la mesa y volvés a la partida como si nada.</p>
       </div>
     </div>
+    <p class="como-nota">Ojo con dos cosas: el tanto del envido lo declarás de palabra, así que la mentira es una opción, no un error; y en 2v2 tu compañero recibe (y puede pescar) señas, no un mensaje de chat.</p>
   </div>
 </section>
 
@@ -643,22 +882,17 @@
   <div class="wrap">
     <span class="kicker">✦ REFERENCIA</span>
     <h2>Comandos</h2>
-    <p class="lead">Todo también se puede hacer por comando, sin mesa de por medio.</p>
-    <div class="cmd-list">
-      <div class="cmd"><code>/truco desafiar &lt;jugador&gt;</code><span>Desafía a otro jugador sin necesidad de mesa.</span></div>
-      <div class="cmd"><code>/truco 2v2 &lt;compañero&gt; &lt;rival1&gt; &lt;rival2&gt;</code><span>Arma un 2v2 por comando — o sentate en una Mesa de Truco Grande, que el lado elige el equipo.</span></div>
-      <div class="cmd"><code>/truco aceptar · rechazar</code><span>Responde un desafío 1v1 o una invitación 2v2.</span></div>
-      <div class="cmd"><code>/truco mesa</code><span>Reabre la mesa de tu partida en curso.</span></div>
-      <div class="cmd"><code>/truco abandonar</code><span>Te vas al mazo… de la partida entera.</span></div>
-      <div class="cmd"><code>/truco revancha</code><span>Pide la revancha en los 30 segundos después de una partida (o el botón de la GUI).</span></div>
-      <div class="cmd"><code>/truco ultima [página]</code><span>El relato completo de tu última partida, paginado de a 12 líneas.</span></div>
-      <div class="cmd"><code>/truco bot facil|normal|picante</code><span>Invoca al Carpincho para jugar contra la máquina (sentado en una mesa).</span></div>
-      <div class="cmd"><code>/truco mascota</code><span>Abre la pantalla de tus carpinchos mascota: llamalos desde donde estén o mandalos a dormir.</span></div>
-      <div class="cmd"><code>/truco stats</code><span>Tu récord contra Carpincho (total y por nivel) y tus mentiras coladas, pescadas y mostradas ganadas.</span></div>
-      <div class="cmd"><code>/truco puntos 15|30</code><span>Puntaje objetivo del servidor, default 15 (solo operadores).</span></div>
-      <div class="cmd"><code>/truco flor con|sin</code><span>Se juega con o sin flor (solo operadores).</span></div>
-      <div class="cmd"><code>/truco mentir con|sin</code><span>Tantos declarados de palabra (default) o cantados automáticos (solo operadores).</span></div>
+    <p class="lead">Jugar NO requiere ningún comando: todo sale de sentarte a la mesa. Estos son solo para consultar datos o, si sos operador del server, para configurar y depurar.</p>
+    <div class="cmd-board panel-paper">
+      <div class="cmd-list">
+        <div class="cmd"><code>/truco stats</code><span>Tu récord contra el Carpincho (total y por nivel) y tus mentiras coladas, pescadas y mostradas ganadas.</span></div>
+        <div class="cmd"><code>/truco last-match [página]</code><span>El relato completo de tu última partida, paginado de a 12 líneas.</span></div>
+        <div class="cmd"><code>/truco pets [come|forget]</code><span>Sin argumento abre el panel de tus mascotas. <code>come</code> las silba; <code>forget</code> olvida a las que se perdieron para siempre.</span></div>
+        <div class="cmd"><code>/truco settings [points|flor|lie|rematch-seconds|pets-limit]</code><span>Cualquiera puede ver los valores actuales. Cambiarlos requiere ser operador <span class="cmd-op">OP</span>: puntaje objetivo, con/sin flor, mentir tantos, segundos de revancha y límite de mascotas.</span></div>
+        <div class="cmd"><code>/truco debug [challenge|2v2|accept|decline|reopen|surrender|rematch|bot]</code><span>Solo operadores <span class="cmd-op">OP</span>, para probar sin depender del mundo: desafiar, armar 2v2, aceptar/rechazar, reabrir la mesa, rendirse, pedir revancha o invocar al Carpincho (<code>bot facil|normal|picante|messi</code>).</span></div>
+      </div>
     </div>
+    <p class="craft-summary">Crafteos: la mesa con lana verde + tablones, la Mesa Grande juntando dos mesas, y la pava con hierro.</p>
   </div>
 </section>
 
@@ -666,15 +900,16 @@
   <div class="wrap">
     <span class="kicker">✦ A JUGAR</span>
     <h2>Instalación</h2>
-    <div class="install-box">
+    <div class="install-box panel-paper">
       <div class="req">
-        <span>MINECRAFT 26.2</span><span>FABRIC LOADER ≥ 0.19.3</span><span>JAVA 25</span><span>CLIENTE + SERVIDOR</span>
+        <span>MINECRAFT 26.2 O 1.21.1</span><span>FABRIC LOADER</span><span>FABRIC API</span><span>CLIENTE + SERVIDOR</span>
       </div>
       <ol>
-        <li>Descargá el jar de tu versión (<code>truco-x.y.z+26.2.jar</code>; hay build para <strong>1.21.1</strong> también) y <a href="https://modrinth.com/mod/fabric-api" target="_blank" rel="noopener">Fabric API</a> si no lo tenés.</li>
+        <li>Descargá el jar de tu versión (hay build para <strong>26.2</strong> y para <strong>1.21.1</strong>, un jar distinto por cada una) y <a href="https://modrinth.com/mod/fabric-api" target="_blank" rel="noopener">Fabric API</a> si no lo tenés.</li>
         <li>Copiá ambos jars a la carpeta <code>mods/</code> de tu instancia y de tu servidor.</li>
-        <li>Crafteá una Mesa de Truco y desafiá a alguien (o al Carpincho).</li>
+        <li>Crafteá una Mesa de Truco y desafiá a alguien (o agachate y clickeá para jugar contra el Carpincho).</li>
       </ol>
+      <p style="margin-bottom:20px; color:var(--ink-soft); font-size:0.92rem">Por ahora la distribución es manual, jar por versión — todavía no está en Modrinth.</p>
       <div style="display:flex; gap:16px; flex-wrap:wrap">
         <a class="btn green" href="https://github.com/fuzilogik2019/truco-minecraft/releases" target="_blank" rel="noopener"><img class="btn-ic" src="assets/mc/icons/crafting_table.png" alt=""> ÚLTIMA VERSIÓN</a>
         <a class="btn ghost" href="https://fabricmc.net/use/installer/" target="_blank" rel="noopener">INSTALAR FABRIC</a>
@@ -689,8 +924,7 @@
     <h2>Roadmap</h2>
     <div class="roadmap">
       <span>Skins de baraja</span>
-      <span>Memoria de yunta de la mascota</span>
-      <span>Leaderboard PvP</span>
+      <span>Leaderboard /truco top</span>
       <span>Apuestas en la mesa</span>
       <span>Torneos</span>
       <span>Publicación en Modrinth</span>
@@ -720,7 +954,7 @@
 <footer>
   <img src="assets/cards/1b.png" alt="">
   <p>Truco Argentino · Mod de Fabric para Minecraft · <a href="https://github.com/fuzilogik2019/truco-minecraft" target="_blank" rel="noopener">Código en GitHub</a></p>
-  <p style="margin-top:8px; opacity:0.75">Licencia MIT — © Fuzilogik. Minecraft es una marca de Mojang/Microsoft; este mod no está afiliado.</p>
+  <p style="margin-top:8px; opacity:0.75">© 2026 Fuzilogik. Licencia MIT — hecho con Fabric. Minecraft es una marca de Mojang/Microsoft; este mod no está afiliado.</p>
   <p style="margin-top:8px; opacity:0.75">Íconos por <a href="https://github.com/themuhamed/mcicons" target="_blank" rel="noopener">McIcons</a> (MIT) · Baraja española por <a href="https://jcanabal.itch.io/spanish-deck-pixel-art" target="_blank" rel="noopener">J. Canabal</a>.</p>
 </footer>
 
@@ -820,6 +1054,120 @@
 
   btn.addEventListener("click", function () { render(dealHand()); });
   render(dealHand());
+})();
+</script>
+
+<script>
+(function () {
+  // ============================================================
+  // CARRUSEL "EN EL JUEGO"
+  // Para sumar una captura real: soltá el PNG en assets/screenshots/
+  // y agregá un objeto acá, con la ruta relativa y un pie de foto.
+  // No hace falta borrar nada más — el carrusel arma los slides solo.
+  //
+  //   var SCREENSHOTS = [
+  //     { src: "assets/screenshots/pulperia.png", caption: "La Pulpería, de noche" },
+  //     { src: "assets/screenshots/2v2.png", caption: "2v2 en la Mesa Grande" }
+  //   ];
+  //
+  // Mientras el array esté vacío (como ahora), el carrusel muestra
+  // placeholders con la lista de capturas que faltan sacar.
+  // ============================================================
+  var SCREENSHOTS = [];
+
+  var PENDING_CAPTIONS = [
+    "La Pulpería",
+    "Mesa Grande 2v2",
+    "El Carpincho Messi",
+    "La pava en la fogata",
+    "Doma de mascota",
+    "GUI de partida"
+  ];
+
+  var track = document.getElementById("carousel-track");
+  var dotsEl = document.getElementById("carousel-dots");
+  var wrap = document.getElementById("carousel");
+  if (!track || !dotsEl || !wrap) return;
+
+  var usingPlaceholders = SCREENSHOTS.length === 0;
+  var slidesData = usingPlaceholders
+    ? PENDING_CAPTIONS.map(function (label) { return { placeholder: true, caption: label }; })
+    : SCREENSHOTS;
+
+  slidesData.forEach(function (s) {
+    var slide = document.createElement("div");
+    slide.className = "carousel-slide" + (s.placeholder ? " placeholder" : "");
+    if (s.placeholder) {
+      slide.innerHTML =
+        '<img src="assets/cards/back.png" alt="">' +
+        '<span class="cap">Falta la captura:<br>&ldquo;' + s.caption + '&rdquo;</span>';
+    } else {
+      var img = document.createElement("img");
+      img.src = s.src;
+      img.alt = s.caption || "";
+      slide.appendChild(img);
+      if (s.caption) {
+        var cap = document.createElement("div");
+        cap.className = "carousel-caption";
+        cap.textContent = s.caption;
+        slide.appendChild(cap);
+      }
+    }
+    track.appendChild(slide);
+  });
+
+  var n = slidesData.length;
+  var idx = 0;
+
+  slidesData.forEach(function (_, i) {
+    var dot = document.createElement("button");
+    dot.type = "button";
+    dot.setAttribute("aria-label", "Ir a la imagen " + (i + 1) + " de " + n);
+    dot.addEventListener("click", function () { goTo(i); });
+    dotsEl.appendChild(dot);
+  });
+  var dots = dotsEl.querySelectorAll("button");
+
+  function render() {
+    track.style.transform = "translateX(-" + (idx * 100) + "%)";
+    dots.forEach(function (d, i) { d.classList.toggle("active", i === idx); });
+  }
+  function goTo(i) { idx = (i + n) % n; render(); }
+  function next() { goTo(idx + 1); }
+  function prev() { goTo(idx - 1); }
+
+  var prevBtn = document.getElementById("carousel-prev");
+  var nextBtn = document.getElementById("carousel-next");
+  if (prevBtn) prevBtn.addEventListener("click", prev);
+  if (nextBtn) nextBtn.addEventListener("click", next);
+
+  wrap.addEventListener("keydown", function (e) {
+    if (e.key === "ArrowLeft") { prev(); }
+    if (e.key === "ArrowRight") { next(); }
+  });
+
+  // Autoplay suave, con pausa al pasar el mouse o entrar por teclado.
+  var AUTOPLAY_MS = 5200;
+  var timer = null;
+  function start() { stop(); if (n > 1) timer = setInterval(next, AUTOPLAY_MS); }
+  function stop() { if (timer) clearInterval(timer); timer = null; }
+  wrap.addEventListener("mouseenter", stop);
+  wrap.addEventListener("mouseleave", start);
+  wrap.addEventListener("focusin", stop);
+  wrap.addEventListener("focusout", start);
+
+  // Swipe táctil básico (sin librerías).
+  var touchX = null;
+  wrap.addEventListener("touchstart", function (e) { touchX = e.touches[0].clientX; }, { passive: true });
+  wrap.addEventListener("touchend", function (e) {
+    if (touchX === null) return;
+    var dx = e.changedTouches[0].clientX - touchX;
+    if (Math.abs(dx) > 40) { dx < 0 ? next() : prev(); }
+    touchX = null;
+  }, { passive: true });
+
+  render();
+  start();
 })();
 </script>
 </body>
