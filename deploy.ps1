@@ -58,7 +58,7 @@ Write-Host "Sincronizando sitio..." -ForegroundColor Cyan
 aws s3 sync $siteDir "s3://$Bucket" @profileArgs `
     --exclude "*.ps1" --exclude "README.md" --exclude ".gitignore" --exclude "index.html" `
     --exclude "*.py" --exclude "*.bat" --exclude "*.aseprite" --exclude ".git/*" `
-    --exclude "assets/logo4.png" --exclude "assets/table_felt.png" `
+    --exclude "assets/logo4.png" `
     --exclude "assets/mesa_de_truco_top.png" `
     --exclude "assets/mc/lana_verde.png" --exclude "assets/mc/tablones.png" `
     --cache-control "public, max-age=604800" --delete
