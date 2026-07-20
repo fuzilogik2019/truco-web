@@ -47,7 +47,7 @@
   }
   /* Todo sprite del mod (cartas, señas, paperdolls, mate, mesas, íconos MC)
      se ve pixelado, tenga o no la clase .pixel puesta a mano. */
-  img.pixel, .hand img, .fan img,
+  img.pixel, .hand img, .fan img, .hero .logo, .brand img,
   img[src*="assets/cards/"], img[src*="assets/mod/"], img[src*="assets/mc/"] {
     image-rendering: pixelated;
   }
@@ -133,7 +133,8 @@
   }
   .frame-table {
     border: 20px solid transparent;
-    border-image: url('assets/mod/table_frame.png') 8 fill stretch;
+    border-image: url('assets/mod/table_frame.png') 8 stretch;
+    background-color: #6b4a26; /* madera de respaldo bajo el marco */
   }
   .panel-paper {
     border: 12px solid transparent;
@@ -208,7 +209,7 @@
   }
   .hero .logo {
     position: relative; z-index: 2; display: block;
-    width: min(540px, 78vw);
+    width: min(552px, 78vw); /* 4x entero de 138px, nítido con pixelated */
     filter: drop-shadow(0 10px 24px rgba(0,0,0,0.6));
   }
   .logo-cards { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
@@ -277,7 +278,7 @@
     transition: transform 0.15s, box-shadow 0.15s;
     box-shadow: var(--shadow);
   }
-  .ncard:hover { transform: translateY(-6px) rotate(-0.5deg); box-shadow: 0 18px 40px rgba(0,0,0,0.4); }
+  .ncard:hover { transform: translateY(-6px); box-shadow: 0 18px 40px rgba(0,0,0,0.4); }
   .ncard .pip {
     position: absolute; top: 12px; left: 14px;
     font-size: 0.95rem; line-height: 1.1;
@@ -315,7 +316,8 @@
   }
   #demo .kicker { color: var(--gold); }
   #demo .lead { margin: 0 auto; color: #c3d6e4; }
-  .table-surface { margin: 44px auto 0; max-width: 620px; padding: 34px 18px 26px; background: rgba(0,0,0,0.18); }
+  .table-surface { margin: 44px auto 0; max-width: 620px; padding: 34px 18px 26px;
+    background: #175C2E url('assets/table_felt.png') repeat; /* paño del juego: base RGB_TABLE + grano */ }
   .hand { display: flex; justify-content: center; gap: 22px; min-height: 190px; align-items: flex-end; }
   .hand img {
     width: clamp(76px, 26vw, 118px); border-radius: 6px;
@@ -391,7 +393,7 @@
   #en-el-juego .kicker { color: var(--gold); }
   #en-el-juego h2 { color: #fff; }
   #en-el-juego .lead { color: #9cb2bf; margin: 0 auto; }
-  .carousel-frame { max-width: 820px; margin: 44px auto 0; padding: 14px; }
+  .carousel-frame { max-width: 820px; margin: 44px auto 0; padding: 14px; background: #14100c; }
   .carousel { position: relative; overflow: hidden; }
   .carousel:focus-visible { outline: 2px solid var(--celeste); outline-offset: 3px; }
   .carousel-track { display: flex; transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1); }
