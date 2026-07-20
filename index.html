@@ -129,6 +129,7 @@
   .panel-dark {
     border: 12px solid transparent;
     border-image: url('assets/mod/panel_dark.png') 6 fill stretch;
+    background-color: #16120e; /* respaldo anti-costuras bajo el nine-slice */
     color: var(--panel-ink);
   }
   .frame-table {
@@ -276,9 +277,10 @@
     padding: 26px 24px 24px;
     position: relative;
     transition: transform 0.15s, box-shadow 0.15s;
+    will-change: transform; /* capa propia: el rotate no re-rasteriza el nine-slice */
     box-shadow: var(--shadow);
   }
-  .ncard:hover { transform: translateY(-6px); box-shadow: 0 18px 40px rgba(0,0,0,0.4); }
+  .ncard:hover { transform: translateY(-6px) rotate(-1deg); box-shadow: 0 18px 40px rgba(0,0,0,0.4); }
   .ncard .pip {
     position: absolute; top: 12px; left: 14px;
     font-size: 0.95rem; line-height: 1.1;
