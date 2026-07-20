@@ -37,19 +37,23 @@ def mesa_grande():
 
 
 def paperdoll(skin_name, out_name, poncho):
-    """Figura frontal 12x22 recortada de la skin: cabeza arriba, cuerpo, 2 patas."""
+    """Figura DE COSTADO 20x18 recortada de la skin (silueta clasica de carpincho,
+    con el ojo visible — los ojos van en los laterales de la cabeza). Caras
+    laterales del desdoblado UV: cuerpo (0,15) 15x9, cabeza (0,34) 8x7,
+    pata (34,29) 3x4, poncho (0,58) 15x6."""
     skin = Image.open(os.path.join(TEX, "entity", f"{skin_name}.png")).convert("RGBA")
-    head = skin.crop((8, 34, 16, 41))    # 8x7
-    body = skin.crop((15, 15, 25, 24))   # 10x9
-    leg = skin.crop((37, 29, 40, 33))    # 3x4
-    fig = Image.new("RGBA", (12, 22))
-    fig.paste(head, (2, 0), head)
-    fig.paste(body, (1, 7), body)
+    head = skin.crop((0, 34, 8, 41))     # lateral 8x7 (con ojo)
+    body = skin.crop((0, 15, 15, 24))    # lateral 15x9
+    leg = skin.crop((34, 29, 37, 33))    # lateral 3x4
+    fig = Image.new("RGBA", (20, 18))
+    fig.paste(body, (5, 4), body)
     if poncho:
-        pon = skin.crop((15, 58, 25, 64))  # 10x6, tapa la parte alta del cuerpo
-        fig.paste(pon, (1, 7), pon)
-    fig.paste(leg, (2, 16), leg)
-    fig.paste(leg, (7, 16), leg)
+        pon = skin.crop((0, 58, 15, 64))  # lateral 15x6, tapa el lomo
+        fig.paste(pon, (5, 4), pon)
+    # Cabeza al frente, mas alta que el lomo y pisando el pecho (como el modelo).
+    fig.paste(head, (0, 0), head)
+    fig.paste(leg, (7, 13), leg)          # pata delantera
+    fig.paste(leg, (15, 13), leg)         # pata trasera
     fig.save(os.path.join(OUT, out_name))
     print("paperdoll", out_name)
 
